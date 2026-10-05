@@ -1,0 +1,640 @@
+<title>Lumi Codebase v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Red+Hat+Text:wght@400;500;600&family=Red+Hat+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout: a working screen, not a poster. Answer first (what needs you), then a dense,
+   sorted table you can drive from the keyboard, then detail with actions. One type
+   superfamily sized for 13px UI; colour only means state. Tokens mirror globals.css. */
+:root {
+  --bg: #0f0e0c; --surface: #161512; --raise: #1d1b18; --rule: #2a2824; --rule-2: #36332e;
+  --text: #ebe6da; --text-2: #d6d0c3; --stone: #a29c8f; --dust: #6d685e;
+  --oxide: #c55d3c; --oxide-wash: rgba(197, 93, 60, 0.13); --ochre: #bf9f5f; --ochre-wash: rgba(191, 159, 95, 0.1);
+  --clay: #b77a5e; --slate: #8b9bb3; --sage: #95a585;
+  --ui: "Red Hat Text", "Segoe UI", system-ui, sans-serif;
+  --mono: "Red Hat Mono", ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f3efe6; --surface: #ebe6db; --raise: #e3ddd0; --rule: #d6cfc1; --rule-2: #c9c1b1;
+    --text: #1c1a17; --text-2: #34312b; --stone: #6a655b; --dust: #938d82;
+    --oxide: #a84a2c; --oxide-wash: rgba(168, 74, 44, 0.1); --ochre: #8c6d2e; --ochre-wash: rgba(140, 109, 46, 0.1);
+    --clay: #9a5f44; --slate: #56698a; --sage: #5b6f4c;
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #f3efe6; --surface: #ebe6db; --raise: #e3ddd0; --rule: #d6cfc1; --rule-2: #c9c1b1;
+  --text: #1c1a17; --text-2: #34312b; --stone: #6a655b; --dust: #938d82;
+  --oxide: #a84a2c; --oxide-wash: rgba(168, 74, 44, 0.1); --ochre: #8c6d2e; --ochre-wash: rgba(140, 109, 46, 0.1);
+  --clay: #9a5f44; --slate: #56698a; --sage: #5b6f4c;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--text); font-family: var(--ui); font-size: 13px; line-height: 1.45; -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 1320px; margin: 0 auto; padding-inline: 24px; padding-block: 28px 80px; }
+@media (max-width: 600px) { .wrap { padding-inline: 16px; } }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; padding: 0; }
+:focus-visible { outline: 1px solid var(--text); outline-offset: 2px; }
+.mono { font-family: var(--mono); }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.label { font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--dust); }
+.oxide { color: var(--oxide); } .ochre { color: var(--ochre); } .stone { color: var(--stone); } .dust { color: var(--dust); }
+a { color: inherit; }
+
+.doc-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 24px; align-items: baseline; padding-bottom: 12px; border-bottom: 1px solid var(--rule); color: var(--stone); }
+.doc-head b { color: var(--text); font-weight: 600; }
+.screen-label { margin: 34px 0 10px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px 20px; align-items: baseline; }
+.screen-label h2 { font-size: 15px; font-weight: 600; margin: 0; }
+.screen-label p { margin: 0; color: var(--stone); }
+.screen { border: 1px solid var(--rule); background: var(--bg); min-width: 0; }
+
+/* App bar */
+.bar { display: flex; align-items: center; gap: 18px; height: 42px; padding: 0 14px; border-bottom: 1px solid var(--rule); }
+.bar .brand { font-weight: 600; letter-spacing: .01em; }
+.bar nav { display: flex; gap: 16px; color: var(--stone); }
+.bar nav [aria-current] { color: var(--text); }
+.search { margin-left: auto; display: flex; align-items: center; border: 1px solid var(--rule); height: 28px; width: min(340px, 42vw); }
+.search input { flex: 1; min-width: 0; background: transparent; border: 0; color: var(--text); font: inherit; padding: 0 9px; height: 100%; }
+.search input::placeholder { color: var(--dust); }
+.search kbd, .keys kbd { font-family: var(--mono); font-size: 11px; color: var(--stone); border: 1px solid var(--rule-2); padding: 0 5px; margin-right: 6px; line-height: 16px; }
+.bar .who { color: var(--dust); font-family: var(--mono); font-size: 12px; }
+@media (max-width: 720px) { .bar nav, .bar .who { display: none; } .search { width: auto; flex: 1; } }
+
+/* Answer strip */
+.answer { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 26px; padding: 14px 16px; border-bottom: 1px solid var(--rule); }
+.answer .since { color: var(--stone); }
+.answer .since b { color: var(--text); font-weight: 500; }
+.counts { display: flex; gap: 6px; flex-wrap: wrap; }
+.count { display: inline-flex; align-items: baseline; gap: 7px; padding: 5px 10px; border: 1px solid var(--rule); color: var(--text-2); }
+.count .n { font-family: var(--mono); font-size: 15px; font-weight: 500; }
+.count.p .n { color: var(--oxide); } .count.d .n { color: var(--ochre); } .count.f .n { color: var(--stone); }
+.count:hover { border-color: var(--rule-2); }
+.count[aria-pressed="true"] { border-color: var(--text); color: var(--text); }
+.range { margin-left: auto; display: flex; border: 1px solid var(--rule); }
+.range button, .views button { padding: 4px 10px; color: var(--stone); }
+.range button[aria-pressed="true"], .views button[aria-pressed="true"] { background: var(--raise); color: var(--text); }
+@media (max-width: 860px) { .range { margin-left: 0; } }
+
+/* Body: table + detail */
+.body { display: grid; grid-template-columns: minmax(0, 1fr) 420px; min-height: 560px; }
+@media (max-width: 1040px) { .body { grid-template-columns: 1fr; } }
+.left { min-width: 0; border-right: 1px solid var(--rule); display: flex; flex-direction: column; }
+@media (max-width: 1040px) { .left { border-right: 0; border-bottom: 1px solid var(--rule); } }
+.left-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--rule); }
+.views { display: flex; border: 1px solid var(--rule); }
+.tbl-scroll { overflow-x: auto; }
+table.mods { width: 100%; border-collapse: collapse; min-width: 640px; }
+.mods th { text-align: left; font-weight: 500; font-size: 11px; color: var(--dust); letter-spacing: .04em; padding: 7px 10px; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+.mods th:first-child, .mods td:first-child { padding-left: 16px; }
+.mods td { padding: 8px 10px; border-bottom: 1px solid var(--rule); vertical-align: middle; white-space: nowrap; }
+.mods tr.row { cursor: pointer; transition: background .12s; }
+.mods tr.row:hover { background: var(--surface); }
+.mods tr.row.sel { background: var(--raise); box-shadow: inset 2px 0 0 var(--text); }
+.mods tr.row[hidden] { display: none; }
+.mods .path { font-family: var(--mono); font-size: 12.5px; color: var(--text); }
+.mods .what { color: var(--dust); margin-left: 8px; }
+.st { font-weight: 500; }
+.st.inc, .st.blk { color: var(--oxide); }
+.st.dec { color: var(--ochre); }
+.st.ok { color: var(--stone); font-weight: 400; }
+.st.none { color: var(--dust); font-weight: 400; }
+.lines { display: flex; align-items: center; gap: 8px; }
+.lines .track { width: 72px; height: 6px; background: var(--surface); display: flex; gap: 1px; }
+.lines .track i { display: block; height: 100%; }
+.lines .n { font-family: var(--mono); font-size: 12px; color: var(--text-2); min-width: 3ch; text-align: right; }
+.agents span { margin-right: 8px; }
+.prs a { font-family: var(--mono); font-size: 12px; margin-right: 6px; text-decoration: none; }
+.prs a:hover { text-decoration: underline; }
+.prs a.p { color: var(--oxide); } .prs a.d { color: var(--ochre); } .prs a.f { color: var(--stone); }
+.mods tr.group td { color: var(--dust); font-size: 11px; letter-spacing: .04em; padding-top: 14px; border-bottom: 1px solid var(--rule); cursor: default; }
+.mods tr.quiet td { color: var(--dust); }
+.mods tr.quiet .path { color: var(--stone); }
+.empty-filter { padding: 16px; color: var(--dust); }
+
+.keys { margin-top: auto; display: flex; flex-wrap: wrap; gap: 6px 16px; padding: 10px 16px; border-top: 1px solid var(--rule); color: var(--dust); font-size: 12px; }
+
+/* Map view */
+.map-wrap { padding: 14px 16px; overflow-x: auto; }
+.map-wrap svg { display: block; width: 100%; min-width: 640px; height: auto; }
+.mnode { cursor: pointer; }
+.mnode rect { fill: var(--surface); stroke: var(--rule-2); transition: stroke .15s; }
+.mnode:hover rect { stroke: var(--stone); }
+.mnode.sel rect { stroke: var(--text); stroke-width: 1.5; }
+.mnode.inc rect, .mnode.blk rect { stroke: var(--oxide); }
+.mnode.dec rect { stroke: var(--ochre); }
+.mnode .t1 { font-family: var(--mono); font-size: 12.5px; fill: var(--text); }
+.mnode .t2 { font-family: var(--ui); font-size: 11.5px; fill: var(--stone); }
+.mnode .t2.inc, .mnode .t2.blk { fill: var(--oxide); } .mnode .t2.dec { fill: var(--ochre); } .mnode .t2.none { fill: var(--dust); }
+.medge { fill: none; stroke: var(--rule-2); stroke-width: 1; transition: stroke .15s, opacity .15s; }
+.marrow { fill: var(--rule-2); transition: fill .15s, opacity .15s; }
+svg.hl .medge, svg.hl .marrow { opacity: .25; }
+svg.hl .medge.on { opacity: 1; stroke: var(--text); } svg.hl .marrow.on { opacity: 1; fill: var(--text); }
+
+/* Detail pane */
+.detail { min-width: 0; }
+.fade { transition: opacity .14s; }
+.fade.out { opacity: 0; }
+.d-head { padding: 14px 18px 12px; border-bottom: 1px solid var(--rule); }
+.d-head .top { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+.d-head .p { font-family: var(--mono); font-size: 15px; font-weight: 500; overflow-wrap: anywhere; }
+.d-head .purpose { margin-top: 5px; color: var(--text-2); }
+.cite { font-family: var(--mono); font-size: 11px; color: var(--dust); margin-left: 6px; white-space: nowrap; }
+.d-sec { padding: 12px 18px; border-bottom: 1px solid var(--rule); }
+.d-sec:last-child { border-bottom: 0; }
+.d-sec > .label { display: block; margin-bottom: 8px; }
+.pr { padding: 9px 0; border-top: 1px solid var(--rule); }
+.pr:first-of-type { border-top: 0; padding-top: 0; }
+.pr .l1 { display: flex; justify-content: space-between; gap: 10px; }
+.pr .title { color: var(--text); font-weight: 500; }
+.pr .meta { color: var(--dust); margin-top: 2px; }
+.pr .why { margin-top: 4px; }
+.acts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.act { border: 1px solid var(--rule-2); padding: 3px 9px; font-size: 12px; color: var(--text-2); }
+.act:hover { border-color: var(--text); color: var(--text); }
+.act.primary { background: var(--text); color: var(--bg); border-color: var(--text); }
+.act.primary:hover { opacity: .88; }
+.act kbd { font-family: var(--mono); font-size: 10.5px; color: inherit; opacity: .6; margin-left: 5px; }
+.nb { display: grid; grid-template-columns: 1fr auto 1fr; gap: 6px 10px; align-items: center; }
+.nb .col { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.nb .col.r { align-items: flex-start; }
+.nb .col.l { align-items: flex-end; text-align: right; }
+.nb button { font-family: var(--mono); font-size: 12px; color: var(--stone); text-align: inherit; }
+.nb button:hover { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+.nb .me { font-family: var(--mono); font-size: 12px; color: var(--text); border: 1px solid var(--rule-2); padding: 3px 8px; white-space: nowrap; }
+.nb .arr { color: var(--dust); font-family: var(--mono); }
+.nb .cap { font-size: 11px; color: var(--dust); }
+.files { width: 100%; border-collapse: collapse; }
+.files td { padding: 3px 0; font-family: var(--mono); font-size: 12px; color: var(--text-2); }
+.files td.r { text-align: right; color: var(--dust); white-space: nowrap; padding-left: 12px; }
+.files tr.un td { color: var(--dust); }
+.add { color: var(--sage); }
+
+/* PR screen */
+.pr-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 24px; align-items: flex-start; padding: 14px 16px; border-bottom: 1px solid var(--rule); }
+.pr-head .t { font-size: 17px; font-weight: 600; }
+.pr-head .m { color: var(--dust); margin-top: 3px; }
+.pr-head .verdict { margin-top: 6px; }
+.pr-body { display: grid; grid-template-columns: minmax(0, 1fr) 400px; }
+@media (max-width: 1040px) { .pr-body { grid-template-columns: 1fr; } }
+.pr-main { min-width: 0; border-right: 1px solid var(--rule); }
+@media (max-width: 1040px) { .pr-main { border-right: 0; border-bottom: 1px solid var(--rule); } }
+.sec { padding: 14px 16px; border-bottom: 1px solid var(--rule); }
+.sec:last-child { border-bottom: 0; }
+.sec-h { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
+.sec-h h3 { margin: 0; font-size: 13px; font-weight: 600; }
+.sec-h .aside { color: var(--dust); }
+.flow-scroll { overflow-x: auto; }
+.flow-scroll svg { display: block; width: 100%; min-width: 700px; height: auto; }
+.fn { cursor: pointer; }
+.fn > rect { fill: var(--surface); stroke: var(--rule-2); transition: stroke .12s; }
+.fn:hover > rect { stroke: var(--stone); }
+.fn.sel > rect { stroke: var(--text); stroke-width: 1.5; }
+.fn.bad > rect { stroke: var(--oxide); }
+.fn.bad.sel > rect { stroke-width: 1.5; }
+.fn .a { font-family: var(--mono); font-size: 13px; fill: var(--text); }
+.fn .b { font-family: var(--mono); font-size: 11px; fill: var(--dust); }
+.fn .c { font-family: var(--ui); font-size: 10.5px; font-weight: 500; letter-spacing: .06em; fill: var(--stone); }
+.fe { fill: none; stroke: var(--rule-2); stroke-width: 1.2; }
+.fe.bad { stroke: var(--oxide); }
+.fl { font-family: var(--mono); font-size: 10.5px; fill: var(--dust); }
+.zr text { font-family: var(--mono); font-size: 12px; fill: var(--text-2); }
+.zr.miss text { fill: var(--oxide); }
+.zr.miss rect { fill: var(--oxide-wash); }
+.errl { font-family: var(--mono); font-size: 11.5px; fill: var(--oxide); }
+.ba { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.ba th { text-align: left; font-weight: 500; font-size: 11px; color: var(--dust); padding: 6px 10px 6px 0; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+.ba td { padding: 6px 10px 6px 0; border-bottom: 1px solid var(--rule); font-family: var(--mono); font-size: 12.5px; white-space: nowrap; color: var(--stone); }
+.ba td.rg { color: var(--text); width: 64px; }
+.ba .was { color: var(--dust); text-decoration: line-through; text-decoration-thickness: 1px; }
+.ba .to { color: var(--dust); margin: 0 6px; }
+.ba .now { color: var(--text); }
+.ba td.crash { background: var(--oxide-wash); }
+.ba td.crash .now { color: var(--oxide); }
+.ba-note { margin-top: 10px; color: var(--stone); }
+.ba-scroll { overflow-x: auto; }
+.video-row { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; color: var(--stone); }
+.video-row b { color: var(--text); font-weight: 500; }
+.code-pane { min-width: 0; }
+.code { border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); background: var(--surface); font-family: var(--mono); font-size: 12px; line-height: 1.7; padding: 6px 0; overflow-x: auto; }
+.code div { display: grid; grid-template-columns: 3.4em 1fr; white-space: pre-wrap; overflow-wrap: anywhere; padding-right: 12px; }
+.code div span:first-child { color: var(--dust); text-align: right; padding-right: 12px; user-select: none; }
+.code div.hot { background: var(--raise); }
+.code div.bad { background: var(--oxide-wash); }
+.code div.bad span:first-child { color: var(--oxide); }
+.cp-h { padding: 14px 16px 10px; }
+.cp-h .f { font-family: var(--mono); font-size: 13px; font-weight: 500; overflow-wrap: anywhere; }
+.cp-note { padding: 10px 16px; color: var(--text-2); }
+.ask { margin: 4px 16px 16px; display: flex; border: 1px solid var(--rule); }
+.ask input { flex: 1; min-width: 0; background: transparent; border: 0; color: var(--text); font: inherit; padding: 7px 9px; }
+.ask input::placeholder { color: var(--dust); }
+.ask button { border-left: 1px solid var(--rule); padding: 0 12px; }
+
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+</style>
+
+<div class="wrap">
+  <div class="doc-head">
+    <span><b>Lumi</b> · Codebase and change diagrams · v2 mockup</span>
+    <span>Demo repo adityas0405/lumi-demo-checkout · real PRs #67–74 · 30 Sep 2026</span>
+  </div>
+
+  <!-- ——— Screen 1: Codebase ——— -->
+  <div class="screen-label">
+    <h2>Codebase</h2>
+    <p>Try <span class="mono">j</span> / <span class="mono">k</span>, the counts, <span class="mono">/</span> to search, and <span class="mono">m</span> for the map.</p>
+  </div>
+  <div class="screen" id="cb">
+    <div class="bar">
+      <span class="brand">Lumi</span>
+      <nav><span>Activity</span><span>Digest</span><span aria-current="page">Codebase</span><span>Incidents</span></nav>
+      <label class="search"><input id="q" placeholder="Filter modules, files, PRs, agents" aria-label="Filter modules, files, PRs and agents"><kbd>/</kbd></label>
+      <span class="who">@adityas0405</span>
+    </div>
+
+    <div class="answer">
+      <span class="since">Since your last visit, <b>Tue 18:02</b>: <b>8 changes</b> by 3 agents in 6 places</span>
+      <div class="counts" role="group" aria-label="Filter by what needs you">
+        <button type="button" class="count p" data-f="p" aria-pressed="false"><span class="n">2</span>problems</button>
+        <button type="button" class="count d" data-f="d" aria-pressed="false"><span class="n">2</span>need your decision</button>
+        <button type="button" class="count f" data-f="f" aria-pressed="false"><span class="n">4</span>merged, no issues</button>
+      </div>
+      <div class="range" role="group" aria-label="Time range">
+        <button type="button" aria-pressed="true">Since last visit</button><button type="button" aria-pressed="false">24 h</button><button type="button" aria-pressed="false">7 d</button>
+      </div>
+    </div>
+
+    <div class="body">
+      <div class="left">
+        <div class="left-head">
+          <span class="label" id="left-label">Where the work landed, most urgent first</span>
+          <div class="views" role="group" aria-label="View">
+            <button type="button" id="v-table" aria-pressed="true">Table</button><button type="button" id="v-map" aria-pressed="false">Map</button>
+          </div>
+        </div>
+        <div id="table-view" class="tbl-scroll">
+          <table class="mods">
+            <thead><tr><th>Module</th><th>State</th><th>Lines changed</th><th>Agents</th><th>PRs</th><th>Last change</th></tr></thead>
+            <tbody id="rows"></tbody>
+          </table>
+          <div class="empty-filter" id="empty" hidden>Nothing matches. Press <span class="mono">Esc</span> to clear.</div>
+        </div>
+        <div id="map-view" class="map-wrap" hidden><svg id="map" viewBox="0 0 972 400" role="img" aria-label="How the modules use each other"></svg></div>
+        <div class="keys"><span><kbd>j</kbd><kbd>k</kbd>move</span><span><kbd>↵</kbd>open top PR</span><span><kbd>/</kbd>filter</span><span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd>problems, decisions, merged</span><span><kbd>m</kbd>map</span><span><kbd>esc</kbd>clear</span></div>
+      </div>
+      <aside class="detail" aria-live="polite"><div class="fade" id="detail"></div></aside>
+    </div>
+  </div>
+
+  <!-- ——— Screen 2: PR review, diagrams at the top ——— -->
+  <div class="screen-label">
+    <h2>PR review: what the change does</h2>
+    <p>The diagram sits at the top of the review, not inside the video. Select any box or row.</p>
+  </div>
+  <div class="screen" id="prs">
+    <div class="bar">
+      <span class="brand">Lumi</span>
+      <nav><span>Activity</span><span>Digest</span><span>Codebase</span><span>Incidents</span></nav>
+      <span class="who" style="margin-left:auto">@adityas0405</span>
+    </div>
+    <div class="pr-head">
+      <div>
+        <div class="t">Zone-based express shipping rates</div>
+        <div class="m"><span class="mono">#69</span> · <span style="color:var(--slate)">Cursor</span> · merged today 14:59 · 2 files, 22 lines · src/checkout</div>
+        <div class="verdict"><span class="st inc">Linked to incident</span><span class="stone"> · Lumi blocked it; it was approved anyway · checkout crashes for NY and WA</span></div>
+      </div>
+      <div class="acts" style="margin-top:2px">
+        <button type="button" class="act primary">Roll back <kbd>R</kbd></button>
+        <button type="button" class="act">Open incident</button>
+        <button type="button" class="act">GitHub ↗</button>
+      </div>
+    </div>
+    <div class="pr-body">
+      <div class="pr-main">
+        <section class="sec">
+          <div class="sec-h"><h3>Call path after the change</h3><span class="aside">From the diff and base code. L = the calling line. Oxide is where it breaks.</span></div>
+          <div class="flow-scroll"><svg id="flow" viewBox="0 0 900 250" role="img" aria-label="Call path from the checkout page to the shipping zone table"></svg></div>
+        </section>
+        <section class="sec">
+          <div class="sec-h"><h3>Shipping price, before → after</h3><span class="aside">$40 cart, 1.2 kg</span></div>
+          <div class="ba-scroll">
+            <table class="ba">
+              <thead><tr><th>Region</th><th>Standard</th><th>Express</th><th>Standard, over $75</th></tr></thead>
+              <tbody id="ba"></tbody>
+            </table>
+          </div>
+          <div class="ba-note">The request said <i>“We ship to CA, OR, TX, NY and WA.”</i> <span class="cite">task:29</span></div>
+        </section>
+        <section class="sec">
+          <div class="video-row"><b>Walkthrough</b><span>1:30 · narrated</span><span>This change at <button type="button" class="mono" style="text-decoration:underline;text-underline-offset:3px">0:33</button></span><span class="dust">Diagrams in the video are the same ones, clickable when paused.</span></div>
+        </section>
+      </div>
+      <aside class="code-pane" aria-live="polite"><div class="fade" id="code"></div></aside>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const swap = (box, html) => {
+    if (reduce) { box.innerHTML = html; return; }
+    box.classList.add("out");
+    setTimeout(() => { box.innerHTML = html; box.classList.remove("out"); }, 120);
+  };
+  const AG = { claude: ["Claude Code", "var(--clay)"], cursor: ["Cursor", "var(--slate)"], devin: ["Devin", "var(--sage)"] };
+  const ST = { inc: "Incident", blk: "Blocked", dec: "Needs you", ok: "Merged", none: "No changes" };
+  const RANK = { inc: 0, blk: 1, dec: 2, ok: 3, none: 4 };
+
+  // PRs since the last visit (the demo week, as ingested).
+  const PR = {
+    69: { t: "Zone-based express shipping rates", a: "cursor", k: "p", s: "Linked to incident", when: "merged today 14:59",
+          why: "Checkout throws for NY and WA carts: the new zone table only lists CA, OR and TX.", acts: [["Review", 1], ["Open incident"], ["Roll back"]] },
+    73: { t: "Harden refund validation against over-refunds", a: "devin", k: "p", s: "Blocked", when: "opened Tue 14:21",
+          why: "Full refunds are now rejected, and the test that catches it was skipped.", acts: [["Review", 1], ["Request changes"]] },
+    72: { t: "Order history: filtering, search, keyset pagination and CSV export", a: "claude", k: "d", s: "Needs your decision", when: "opened Mon 12:02",
+          why: "CSV export skips orders not yet loaded; lifetime spend now leaves out cancelled orders.", acts: [["Review", 1], ["Approve"]] },
+    74: { t: "Round sales tax half-even to match the processor's tax report", a: "claude", k: "d", s: "Needs your decision", when: "opened today 06:31",
+          why: "Matches the processor; refunds of older orders may come up a cent short.", acts: [["Review", 1], ["Approve"]] },
+    71: { t: "Clearer checkout button: show the amount and a lock icon", a: "cursor", k: "f", s: "Merged", when: "merged Sun 11:09", why: "", acts: [["Review", 1]] },
+    70: { t: "Use date-fns for the order confirmation timestamp", a: "devin", k: "f", s: "Merged", when: "merged Sun 07:58", why: "Adds a dependency: date-fns.", acts: [["Review", 1]] },
+    67: { t: "Add validation tests for cart quantities and coupons", a: "claude", k: "f", s: "Merged", when: "merged Thu 08:12", why: "Tests only.", acts: [["Review", 1]] },
+    68: { t: "Document dev setup, conventions and deploys in README", a: "cursor", k: "f", s: "Merged", when: "merged Thu 09:35", why: "Docs only.", acts: [["Review", 1]] },
+  };
+  const M = [
+    { id: "checkout", path: "src/checkout", what: "cart, coupons, shipping, totals", st: "inc", last: "today 14:59",
+      lines: { cursor: 22 }, prs: [69, 67], cite: "doc:README.md", purpose: "Cart, coupons, shipping and order totals.",
+      files: [["shipping.ts", "+20", 69], ["totals.ts", "+2", 69], ["cart.test.ts", "+28", 67], ["discounts.test.ts", "+32", 67]], quiet: ["cart.ts", "discounts.ts"] },
+    { id: "payments", path: "src/payments", what: "sales tax, refunds", st: "blk", last: "today 06:31",
+      lines: { devin: 25, claude: 11 }, prs: [73, 74], cite: "doc:README.md", purpose: "Sales tax and refunds.",
+      files: [["refunds.ts", "25", 73], ["tax.ts", "11", 74]], quiet: [] },
+    { id: "orders", path: "src/orders", what: "order history", st: "dec", last: "Mon 12:02",
+      lines: { claude: 482 }, prs: [72], cite: "doc:README.md", purpose: "Order history. Not used by the app on main yet; #72 adds the screen.",
+      files: [["filters.ts", "81", 72], ["pagination.ts", "77", 72], ["sampleOrders.ts", "69", 72], ["types.ts", "63", 72], ["export.ts", "48", 72], ["+ 4 more", "144", 72]], quiet: [] },
+    { id: "ui", path: "src/ui", what: "checkout page", st: "dec", last: "Mon 12:02",
+      lines: { claude: 172, cursor: 18, devin: 6 }, prs: [72, 71, 70], cite: "doc:README.md", purpose: "The checkout page: cart lines, summary with coupon entry, order confirmation.",
+      files: [["OrderHistory.tsx", "new, 172", 72], ["CartSummary.tsx", "18", 71], ["OrderConfirmation.tsx", "6", 70]], quiet: ["Checkout.tsx"] },
+    { id: "money", path: "src/money.ts", what: "integer cents", st: "dec", last: "today 06:31",
+      lines: { claude: 14 }, prs: [74], cite: "doc:README.md", purpose: "All money is integer cents: formatting and checks.",
+      files: [["money.ts", "14", 74]], quiet: [] },
+    { id: "deps", path: "package.json", what: "dependencies", st: "ok", last: "Sun 07:58",
+      lines: { devin: 1 }, prs: [70], cite: "code:package.json", purpose: "Runtime dependencies. New this period: date-fns.",
+      files: [["package.json", "+ date-fns", 70]], quiet: [] },
+    { id: "docs", path: "README.md", what: "docs", st: "ok", last: "Thu 09:35",
+      lines: { cursor: 25 }, prs: [68], cite: "doc:README.md", purpose: "Setup, conventions and deploys.",
+      files: [["README.md", "25", 68]], quiet: [] },
+    { id: "app", path: "src/App.tsx", what: "app shell", st: "none", last: "", lines: {}, prs: [], cite: "code:src/App.tsx",
+      purpose: "Mounts the checkout page and keeps the cart in state.", files: [], quiet: ["App.tsx", "main.tsx"] },
+    { id: "catalog", path: "src/catalog.ts", what: "products", st: "none", last: "", lines: {}, prs: [], cite: "code:src/catalog.ts",
+      purpose: "The products on sale and their prices.", files: [], quiet: ["catalog.ts"] },
+  ];
+  const USES = [["app", "ui"], ["app", "checkout"], ["ui", "checkout"], ["ui", "payments"], ["ui", "catalog"], ["ui", "money"],
+    ["checkout", "payments"], ["checkout", "catalog"], ["checkout", "money"], ["payments", "money"], ["catalog", "money"], ["orders", "money"]];
+  const byId = Object.fromEntries(M.map((m) => [m.id, m]));
+  const total = (m) => Object.values(m.lines).reduce((a, b) => a + b, 0);
+  const MAXL = Math.max(...M.map(total));
+
+  // Table
+  const tbody = document.getElementById("rows");
+  const rowEls = {};
+  const changed = M.filter((m) => m.st !== "none").sort((a, b) => RANK[a.st] - RANK[b.st] || total(b) - total(a));
+  const quiet = M.filter((m) => m.st === "none");
+  const addRow = (m) => {
+    const tr = document.createElement("tr");
+    tr.className = "row" + (m.st === "none" ? " quiet" : "");
+    tr.tabIndex = -1;
+    tr.dataset.id = m.id;
+    const n = total(m);
+    const bar = Object.entries(m.lines).map(([a, v]) => `<i style="width:${Math.max(3, (v / MAXL) * 72)}px;background:${AG[a][1]}" title="${AG[a][0]}: ${v}"></i>`).join("");
+    tr.innerHTML = `
+      <td title="${esc(m.what)}"><span class="path">${esc(m.path)}</span></td>
+      <td><span class="st ${m.st}">${ST[m.st]}</span></td>
+      <td>${n ? `<div class="lines"><span class="n">${m.id === "deps" ? "+1 dep" : n}</span><span class="track">${bar}</span></div>` : '<span class="dust">—</span>'}</td>
+      <td class="agents">${Object.keys(m.lines).map((a) => `<span style="color:${AG[a][1]}">${AG[a][0]}</span>`).join("") || '<span class="dust">—</span>'}</td>
+      <td class="prs">${m.prs.map((p) => `<a href="#pr${p}" class="${PR[p].k}" data-pr="${p}">#${p}</a>`).join("") || '<span class="dust">—</span>'}</td>
+      <td class="dust">${m.last || "—"}</td>`;
+    tr.addEventListener("click", (e) => { if (!e.target.closest("a")) select(m.id); });
+    tbody.appendChild(tr);
+    rowEls[m.id] = tr;
+  };
+  changed.forEach(addRow);
+  const g = document.createElement("tr");
+  g.className = "group";
+  g.innerHTML = `<td colspan="6">Unchanged since your last visit · ${quiet.length}</td>`;
+  tbody.appendChild(g);
+  quiet.forEach(addRow);
+
+  // Detail
+  const detail = document.getElementById("detail");
+  let sel = changed[0].id;
+  const renderDetail = (id, animate) => {
+    const m = byId[id];
+    const usedBy = USES.filter(([, t]) => t === id).map(([f]) => f);
+    const uses = USES.filter(([f]) => f === id).map(([, t]) => t);
+    const prs = m.prs.map((p) => {
+      const r = PR[p];
+      const tone = r.k === "p" ? "inc" : r.k === "d" ? "dec" : "ok";
+      return `<div class="pr">
+        <div class="l1"><span class="title">${esc(r.t)}</span><span class="st ${tone}" style="white-space:nowrap">${r.s}</span></div>
+        <div class="meta"><span class="mono">#${p}</span> · <span style="color:${AG[r.a][1]}">${AG[r.a][0]}</span> · ${r.when}</div>
+        ${r.why ? `<div class="why ${r.k === "p" ? "" : "stone"}">${esc(r.why)}</div>` : ""}
+        ${r.k === "f" ? "" : `<div class="acts">${r.acts.map(([a, pri], i) => `<button type="button" class="act${pri ? " primary" : ""}">${a}${i === 0 ? "<kbd>↵</kbd>" : ""}</button>`).join("")}</div>`}
+      </div>`;
+    }).join("");
+    const inMap = USES.some(([f, t]) => f === id || t === id);
+    const html = `
+      <div class="d-head">
+        <div class="top"><span class="p">${esc(m.path)}</span><span class="st ${m.st}">${ST[m.st]}</span></div>
+        <div class="purpose">${esc(m.purpose)}<span class="cite">${esc(m.cite)}</span></div>
+      </div>
+      ${m.prs.length ? `<div class="d-sec"><span class="label">Changes since your last visit · ${m.prs.length}</span>${prs}</div>` : `<div class="d-sec"><span class="dust">No agent work here since your last visit.</span></div>`}
+      ${inMap ? `<div class="d-sec"><span class="label">How it connects</span>
+        <div class="nb">
+          <div class="col l">${usedBy.length ? usedBy.map((u) => `<button type="button" data-go="${u}">${esc(byId[u].path)}</button>`).join("") : '<span class="cap">nothing uses it</span>'}<span class="cap">used by</span></div>
+          <span class="me">${esc(m.path.replace("src/", ""))}</span>
+          <div class="col r">${uses.length ? uses.map((u) => `<button type="button" data-go="${u}">${esc(byId[u].path)}</button>`).join("") : '<span class="cap">uses nothing else</span>'}<span class="cap">uses</span></div>
+        </div></div>` : ""}
+      ${m.files.length || m.quiet.length ? `<div class="d-sec"><span class="label">Files</span><table class="files">
+        ${m.files.map(([f, n, p]) => `<tr><td>${esc(f)}</td><td class="r">${esc(n)} · #${p}</td></tr>`).join("")}
+        ${m.quiet.map((f) => `<tr class="un"><td>${esc(f)}</td><td class="r">unchanged</td></tr>`).join("")}
+      </table></div>` : ""}`;
+    animate ? swap(detail, html) : (detail.innerHTML = html);
+  };
+  detail.addEventListener("click", (e) => { const b = e.target.closest("[data-go]"); if (b) select(b.dataset.go); });
+  const select = (id, animate = true) => {
+    sel = id;
+    Object.entries(rowEls).forEach(([k, tr]) => tr.classList.toggle("sel", k === id));
+    Object.entries(mapNodes).forEach(([k, n]) => n.classList.toggle("sel", k === id));
+    renderDetail(id, animate);
+  };
+
+  // Filters: attention counts and text
+  let fKind = null;
+  const q = document.getElementById("q");
+  const applyFilter = () => {
+    const term = q.value.trim().toLowerCase();
+    let shown = 0;
+    M.forEach((m) => {
+      const hay = [m.path, m.what, ...m.prs.map((p) => `#${p} ${PR[p].t} ${AG[PR[p].a][0]}`), ...m.files.map((f) => f[0])].join(" ").toLowerCase();
+      const okKind = !fKind || m.prs.some((p) => PR[p].k === fKind);
+      const okText = !term || hay.includes(term);
+      rowEls[m.id].hidden = !(okKind && okText);
+      if (!rowEls[m.id].hidden) shown++;
+    });
+    g.hidden = !!(fKind || term);
+    document.getElementById("empty").hidden = shown > 0;
+    const first = M.map((m) => m.id).find((id) => !rowEls[id].hidden && changed.includes(byId[id])) ||
+      M.map((m) => m.id).find((id) => !rowEls[id].hidden);
+    if (first && rowEls[sel].hidden) select(first);
+  };
+  document.querySelectorAll(".count").forEach((b) => b.addEventListener("click", () => {
+    fKind = fKind === b.dataset.f ? null : b.dataset.f;
+    document.querySelectorAll(".count").forEach((x) => x.setAttribute("aria-pressed", x.dataset.f === fKind));
+    applyFilter();
+  }));
+  q.addEventListener("input", applyFilter);
+  document.querySelectorAll(".range button").forEach((b) => b.addEventListener("click", () => {
+    document.querySelectorAll(".range button").forEach((x) => x.setAttribute("aria-pressed", x === b));
+  }));
+
+  // Map view (secondary): same modules, state always visible
+  const svg = document.getElementById("map");
+  const NS = "http://www.w3.org/2000/svg";
+  const mk = (tag, a, p) => { const n = document.createElementNS(NS, tag); for (const k in a) n.setAttribute(k, a[k]); p && p.appendChild(n); return n; };
+  const W = 196, H = 50;
+  const POS = { app: [10, 60, 0], ui: [10, 250, 0], checkout: [262, 60, 1], orders: [262, 330, 1], payments: [514, 10, 2], catalog: [766, 150, 3], money: [766, 330, 3] };
+  const eg = mk("g", {}, svg), ng = mk("g", {}, svg);
+  const mapEdges = [];
+  USES.forEach(([f, t]) => {
+    const [ax, ay, ac] = POS[f], [bx, by, bc] = POS[t];
+    let d, tip;
+    if (ac === bc) { const x = ax + W / 2; d = `M${x},${ay + H} L${x},${by - 5}`; tip = `translate(${x},${by}) rotate(90)`; }
+    else { const x1 = ax + W, y1 = ay + H / 2, x2 = bx - 5, y2 = by + H / 2, mx = (x1 + x2) / 2; d = `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`; tip = `translate(${bx},${y2})`; }
+    const p = mk("path", { d, class: "medge" }, eg);
+    const ar = mk("path", { d: "M0,0 L-7,-3.5 L-7,3.5 Z", class: "marrow", transform: tip }, eg);
+    mapEdges.push({ f, t, p, ar });
+  });
+  const mapNodes = {};
+  Object.entries(POS).forEach(([id, [x, y]]) => {
+    const m = byId[id];
+    const outer = mk("g", { transform: `translate(${x},${y})` }, ng);
+    const n = mk("g", { class: `mnode ${m.st}`, tabindex: "0", role: "button", "aria-label": m.path }, outer);
+    mk("rect", { width: W, height: H, rx: 1 }, n);
+    mk("text", { class: "t1", x: 12, y: 21 }, n).textContent = m.path.replace("src/", "");
+    const n2 = total(m);
+    mk("text", { class: `t2 ${m.st}`, x: 12, y: 38 }, n).textContent = m.st === "none" ? "no changes" : `${ST[m.st]} · ${n2} lines · ${m.prs.length} PR${m.prs.length === 1 ? "" : "s"}`;
+    n.addEventListener("click", () => select(id));
+    n.addEventListener("mouseenter", () => { svg.classList.add("hl"); mapEdges.forEach((e) => { const on = e.f === id || e.t === id; e.p.classList.toggle("on", on); e.ar.classList.toggle("on", on); }); });
+    n.addEventListener("mouseleave", () => svg.classList.remove("hl"));
+    mapNodes[id] = n;
+  });
+  const setView = (v) => {
+    document.getElementById("v-table").setAttribute("aria-pressed", v === "table");
+    document.getElementById("v-map").setAttribute("aria-pressed", v === "map");
+    document.getElementById("table-view").hidden = v !== "table";
+    document.getElementById("map-view").hidden = v !== "map";
+    document.getElementById("left-label").textContent = v === "table" ? "Where the work landed, most urgent first" : "How the parts use each other · arrows point to what is used";
+  };
+  document.getElementById("v-table").addEventListener("click", () => setView("table"));
+  document.getElementById("v-map").addEventListener("click", () => setView("map"));
+
+  // Keyboard, scoped to the Codebase screen
+  const cb = document.getElementById("cb");
+  const visible = () => [...tbody.querySelectorAll("tr.row")].filter((r) => !r.hidden).map((r) => r.dataset.id);
+  document.addEventListener("keydown", (e) => {
+    const typing = e.target.closest("input, textarea");
+    if (e.key === "/" && !typing) { e.preventDefault(); q.focus(); cb.scrollIntoView({ block: "nearest" }); return; }
+    if (e.key === "Escape") { q.value = ""; fKind = null; document.querySelectorAll(".count").forEach((x) => x.setAttribute("aria-pressed", false)); applyFilter(); q.blur(); return; }
+    if (typing) return;
+    const ids = visible(), i = ids.indexOf(sel);
+    if (e.key === "j" || e.key === "ArrowDown") { e.preventDefault(); if (i < ids.length - 1) select(ids[i + 1]); rowEls[sel].scrollIntoView({ block: "nearest" }); }
+    else if (e.key === "k" || e.key === "ArrowUp") { e.preventDefault(); if (i > 0) select(ids[i - 1]); rowEls[sel].scrollIntoView({ block: "nearest" }); }
+    else if (e.key === "m") setView(document.getElementById("map-view").hidden ? "map" : "table");
+    else if (["1", "2", "3"].includes(e.key)) document.querySelector(`.count[data-f="${"pdf"[+e.key - 1]}"]`).click();
+    else if (e.key === "Enter") { const b = detail.querySelector(".act.primary"); if (b) b.focus(); }
+  });
+  select(sel, false);
+
+  /* ——— Screen 2: call path and before → after ——— */
+  const flow = document.getElementById("flow");
+  const FWd = 140, FH = 56, Y = 70;
+  const F = [
+    { id: "page", a: "Checkout page", b: "App.tsx:24", x: 0 },
+    { id: "totals", a: "computeTotals", b: "totals.ts:17", x: 190, c: "CHANGED" },
+    { id: "ship", a: "shippingFor", b: "shipping.ts:21", x: 380, c: "CHANGED" },
+    { id: "zone", a: "zoneFor", b: "shipping.ts:17", x: 570, c: "NEW", bad: true },
+  ];
+  const fe = mk("g", {}, flow), fn = mk("g", {}, flow);
+  const flowNodes = {};
+  const edgeLbl = ["line 24", "line 21 · passes region", "line 27"];
+  F.forEach((n, i) => {
+    const o = mk("g", { transform: `translate(${n.x + 4},${Y})` }, fn);
+    const g2 = mk("g", { class: "fn" + (n.bad ? " bad" : ""), tabindex: "0", role: "button", "aria-label": n.a }, o);
+    mk("rect", { width: FWd, height: FH, rx: 1 }, g2);
+    mk("text", { class: "a", x: 11, y: 23 }, g2).textContent = n.a;
+    mk("text", { class: "b", x: 11, y: 42 }, g2).textContent = n.b;
+    if (n.c) mk("text", { class: "c", x: 0, y: -9 }, g2).textContent = n.c;
+    flowNodes[n.id] = g2;
+    if (i < F.length - 1) {
+      const x1 = n.x + 4 + FWd, x2 = F[i + 1].x + 4;
+      mk("path", { d: `M${x1},${Y + FH / 2} L${x2 - 4},${Y + FH / 2}`, class: "fe" }, fe);
+      mk("path", { d: `M${x2 - 2},${Y + FH / 2} l-7,-3.5 l0,7 z`, fill: "var(--rule-2)" }, fe);
+      mk("text", { class: "fl", x: (x1 + x2) / 2 - 2, y: Y + FH / 2 - 7, "text-anchor": "middle" }, fe).textContent = edgeLbl[i].split(" · ")[0].replace("line ", "L");
+    }
+  });
+  // Table node
+  const TX = 764, TY = 30, TW = 130, rows = [["CA", "1"], ["OR", "1"], ["TX", "2"], ["NY", "missing"], ["WA", "missing"]];
+  mk("path", { d: `M${570 + 4 + FWd},${Y + FH / 2} L${TX - 4},${Y + FH / 2}`, class: "fe bad" }, fe);
+  mk("path", { d: `M${TX - 2},${Y + FH / 2} l-7,-3.5 l0,7 z`, fill: "var(--oxide)" }, fe);
+  mk("text", { class: "fl", x: (570 + 4 + FWd + TX) / 2 - 2, y: Y + FH / 2 - 7, "text-anchor": "middle", style: "fill:var(--oxide)" }, fe).textContent = "L18";
+  const tOuter = mk("g", { transform: `translate(${TX},${TY})` }, fn);
+  const tbl = mk("g", { class: "fn bad", tabindex: "0", role: "button", "aria-label": "SHIPPING_ZONES" }, tOuter);
+  mk("rect", { width: TW, height: 36 + rows.length * 26 + 6, rx: 1 }, tbl);
+  mk("text", { class: "a", x: 10, y: 22, style: "font-size:11.5px" }, tbl).textContent = "SHIPPING_ZONES";
+  mk("text", { class: "c", x: 0, y: -9 }, tbl).textContent = "NEW";
+  rows.forEach(([r, z], i) => {
+    const gr = mk("g", { class: "zr" + (z === "missing" ? " miss" : ""), transform: `translate(0,${34 + i * 26})` }, tbl);
+    mk("rect", { x: 1, y: 0, width: TW - 2, height: 24, fill: "transparent" }, gr);
+    mk("text", { x: 10, y: 16 }, gr).textContent = r;
+    mk("text", { x: 44, y: 16 }, gr).textContent = z === "missing" ? "missing" : "zone " + z;
+  });
+  flowNodes.table = tbl;
+  mk("text", { class: "errl", x: 4, y: 206 }, flow).textContent = "NY, WA carts: TypeError: Cannot read properties of undefined (reading 'zone') at zoneFor, shipping.ts:18";
+
+  const CODE = {
+    page: { f: "src/App.tsx", s: 24, hot: [24], l: ["  const totals = useMemo(() => computeTotals(cart), [cart]);"], n: "Recomputed on every cart change, including picking a region." },
+    totals: { f: "src/checkout/totals.ts", s: 20, hot: [21], l: ["  const taxable = subtotalCents - discountCents;", "  const shippingCents = shippingFor(cart.shippingMethod, taxable, totalWeight(cart), cart.region);"], n: "Changed: every cart's region now reaches the shipping code." },
+    ship: { f: "src/checkout/shipping.ts", s: 26, hot: [27], l: ["): Cents {", "  const zone = zoneFor(region);", "  if (method === \"standard\" && subtotalCents >= FREE_SHIPPING_THRESHOLD) return 0;"], n: "The zone is looked up before the standard-shipping return, so standard carts break too." },
+    zone: { f: "src/checkout/shipping.ts", s: 17, bad: [18], l: ["export function zoneFor(region: string): 1 | 2 {", "  return SHIPPING_ZONES[region]!.zone;", "}"], n: "The ! asserts every region is listed. NY and WA aren't, so .zone throws." },
+    table: { f: "src/checkout/shipping.ts", s: 9, hot: [10, 11, 12], l: ["const SHIPPING_ZONES: Record<string, { zone: 1 | 2 }> = {", "  CA: { zone: 1 },", "  OR: { zone: 1 },", "  TX: { zone: 2 },", "};"], n: "Three regions; the request lists five." },
+  };
+  const NAME = { page: "Checkout page", totals: "computeTotals", ship: "shippingFor", zone: "zoneFor", table: "SHIPPING_ZONES" };
+  const codeBox = document.getElementById("code");
+  const showCode = (id, animate = true) => {
+    const c = CODE[id];
+    Object.entries(flowNodes).forEach(([k, n]) => n.classList.toggle("sel", k === id));
+    const html = `
+      <div class="cp-h"><span class="label">Selected · ${NAME[id]}</span><div class="f">${esc(c.f)}</div></div>
+      <div class="code">${c.l.map((line, i) => { const n = c.s + i; const cls = (c.bad || []).includes(n) ? "bad" : (c.hot || []).includes(n) ? "hot" : ""; return `<div class="${cls}"><span>${n}</span><span>${esc(line)}</span></div>`; }).join("")}</div>
+      <div class="cp-note">${esc(c.n)}</div>
+      <form class="ask" onsubmit="event.preventDefault()"><input id="ask-code" placeholder="Ask about ${NAME[id]}" aria-label="Ask about ${NAME[id]}"><button type="submit">Ask</button></form>`;
+    animate ? swap(codeBox, html) : (codeBox.innerHTML = html);
+  };
+  Object.entries(flowNodes).forEach(([id, n]) => {
+    n.addEventListener("click", () => showCode(id));
+    n.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); showCode(id); } });
+  });
+  showCode("zone", false);
+
+  const BA = [
+    ["CA", ["$5.99", "$5.99"], ["$15.00", "$12.00"], ["Free", "Free"]],
+    ["OR", ["$5.99", "$5.99"], ["$15.00", "$12.00"], ["Free", "Free"]],
+    ["TX", ["$5.99", "$5.99"], ["$15.00", "$19.00"], ["Free", "Free"]],
+    ["NY", ["$5.99", "throws"], ["$15.00", "throws"], ["Free", "throws"]],
+    ["WA", ["$5.99", "throws"], ["$15.00", "throws"], ["Free", "throws"]],
+  ];
+  document.getElementById("ba").innerHTML = BA.map(([r, ...cells]) => `<tr><td class="rg">${r}</td>${cells.map(([b, a]) =>
+    b === a ? `<td>${b}</td>` : `<td class="${a === "throws" ? "crash" : ""}"><span class="was">${b}</span><span class="to">→</span><span class="now">${a}</span></td>`).join("")}</tr>`).join("");
+})();
+</script>

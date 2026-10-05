@@ -1,0 +1,897 @@
+<title>Lumi Codebase Page</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Schibsted+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout: three plates, each an app screen at true proportion. Structure comes from
+   hairlines, type and spacing; oxide means a problem, ochre means waiting on someone.
+   One orchestrated motion per plate. Tokens mirror apps/web/app/globals.css. */
+:root {
+  --bg: #0f0e0c; --surface: #161512; --raise: #1d1b18; --rule: #2a2824;
+  --text: #ebe6da; --text-2: #d6d0c3; --stone: #a29c8f; --dust: #6d685e;
+  --oxide: #c55d3c; --oxide-wash: rgba(197, 93, 60, 0.14); --ochre: #bf9f5f;
+  --clay: #b77a5e; --slate: #8b9bb3; --sage: #95a585;
+  --serif: "Newsreader", Georgia, serif;
+  --sans: "Schibsted Grotesk", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  /* The video and player frame keep the editorial dark look in either theme. */
+  --v-ink: #0f0e0c; --v-ink2: #161512; --v-rule: #2a2824; --v-paper: #ebe6da;
+  --v-dim: #d6d0c3; --v-stone: #a29c8f; --v-dust: #6d685e; --v-oxide: #c55d3c;
+  --v-oxide-wash: rgba(197, 93, 60, 0.16); --v-code: #cbc5b8;
+  --ease: cubic-bezier(.2, .7, .2, 1);
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f3efe6; --surface: #ebe6db; --raise: #e3ddd0; --rule: #d6cfc1;
+    --text: #1c1a17; --text-2: #34312b; --stone: #6a655b; --dust: #938d82;
+    --oxide: #a84a2c; --oxide-wash: rgba(168, 74, 44, 0.1); --ochre: #8c6d2e;
+    --clay: #9a5f44; --slate: #56698a; --sage: #5b6f4c;
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #f3efe6; --surface: #ebe6db; --raise: #e3ddd0; --rule: #d6cfc1;
+  --text: #1c1a17; --text-2: #34312b; --stone: #6a655b; --dust: #938d82;
+  --oxide: #a84a2c; --oxide-wash: rgba(168, 74, 44, 0.1); --ochre: #8c6d2e;
+  --clay: #9a5f44; --slate: #56698a; --sage: #5b6f4c;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px;
+  line-height: 1.5; -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1240px; margin: 0 auto; padding-inline: 24px; padding-block: 40px 96px; }
+@media (max-width: 600px) { .wrap { padding-inline: 16px; } }
+a { color: inherit; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+button:focus-visible, [tabindex]:focus-visible, input:focus-visible { outline: 1px solid var(--text); outline-offset: 3px; }
+.kicker { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--stone); }
+.mono { font-family: var(--mono); }
+h1, h2, h3 { font-family: var(--serif); font-weight: 400; margin: 0; text-wrap: balance; }
+
+/* Page head */
+.masthead { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 12px 24px; border-bottom: 1px solid var(--rule); padding-bottom: 14px; }
+.wordmark { font-family: var(--serif); font-size: 22px; }
+.intro { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 24px 64px; padding-block: 40px 8px; }
+.intro h1 { font-size: clamp(32px, 4.4vw, 52px); line-height: 1.06; }
+.intro p { margin: 0; color: var(--text-2); max-width: 62ch; }
+.intro ol { margin: 18px 0 0; padding: 0; list-style: none; display: grid; gap: 0; }
+.intro li a { display: flex; gap: 14px; align-items: baseline; padding: 9px 0; border-top: 1px solid var(--rule); text-decoration: none; }
+.intro li a:hover .t { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+.intro li .n { font-family: var(--mono); font-size: 12px; color: var(--dust); width: 1.5em; }
+@media (max-width: 820px) { .intro { grid-template-columns: 1fr; } }
+
+.plate { margin-top: 72px; }
+.plate-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px 24px; margin-bottom: 18px; }
+.plate-head h2 { font-size: 28px; }
+.plate-head p { margin: 6px 0 0; color: var(--stone); max-width: 70ch; font-size: 14px; }
+.screen { border: 1px solid var(--rule); background: var(--bg); }
+
+/* App chrome inside a plate */
+.appbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 28px; padding: 12px 20px; border-bottom: 1px solid var(--rule); font-size: 13px; color: var(--stone); }
+.appbar .wordmark { font-size: 18px; color: var(--text); margin-right: 8px; }
+.appbar nav { display: flex; flex-wrap: wrap; gap: 4px 22px; }
+.appbar nav span[aria-current] { color: var(--text); border-bottom: 1px solid var(--text); padding-bottom: 2px; }
+.appbar .who { margin-left: auto; font-family: var(--mono); font-size: 12px; }
+
+/* ——— Plate: Codebase page ——— */
+.cb-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 16px 32px; padding: 26px 24px 18px; }
+.cb-head h3 { font-size: clamp(26px, 3vw, 36px); line-height: 1.1; margin-top: 10px; }
+.cb-head .sub { color: var(--stone); font-size: 13px; margin-top: 8px; }
+.seg { display: inline-flex; border: 1px solid var(--rule); font-size: 13px; }
+.seg button { padding: 6px 14px; color: var(--stone); transition: background .2s, color .2s; }
+.seg button[aria-pressed="true"] { background: var(--text); color: var(--bg); }
+.cb-body { display: grid; grid-template-columns: minmax(0, 1fr) 340px; border-top: 1px solid var(--rule); }
+@media (max-width: 980px) { .cb-body { grid-template-columns: 1fr; } }
+.map-col { min-width: 0; padding: 18px 20px 14px; border-right: 1px solid var(--rule); }
+.map-col .stick { position: sticky; top: env(safe-area-inset-top, 0px); }
+@media (max-width: 980px) { .map-col { border-right: 0; border-bottom: 1px solid var(--rule); } }
+.map-scroll { overflow-x: auto; }
+.map-scroll svg { display: block; width: 100%; min-width: 640px; height: auto; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 22px; font-size: 12px; color: var(--stone); padding-top: 10px; min-height: 26px; }
+.legend .sw { display: inline-block; width: 16px; height: 0; border-top: 2px solid; vertical-align: middle; margin-right: 7px; }
+.legend[data-mode="structure"] .wk, .legend[data-mode="week"] .st { display: none; }
+.facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--rule); margin-top: 12px; }
+.facts > div { padding: 12px 16px 4px 0; font-size: 13px; color: var(--text-2); min-width: 0; }
+.facts .kicker { display: block; margin-bottom: 4px; }
+@media (max-width: 700px) { .facts { grid-template-columns: 1fr; } }
+
+/* Diagram (shared by the Codebase page) */
+.node { cursor: pointer; transition: opacity .35s var(--ease); }
+.node rect.box { fill: var(--surface); stroke: var(--rule); stroke-width: 1; transition: stroke .25s, fill .25s; }
+.node .name { font-family: var(--serif); font-size: 17px; fill: var(--text); }
+.node .path { font-family: var(--mono); font-size: 10.5px; fill: var(--dust); }
+.node .count { font-family: var(--mono); font-size: 10.5px; fill: var(--stone); opacity: 0; transition: opacity .3s; }
+.node .bar { transform-box: fill-box; transform-origin: left center; transform: scaleX(0); transition: transform .6s var(--ease); }
+.node:hover rect.box { stroke: var(--stone); }
+.node.sel rect.box { stroke: var(--text); stroke-width: 1.5; }
+.edge { fill: none; stroke: var(--dust); stroke-width: 1; transition: stroke .25s, opacity .25s; }
+.arrow { fill: var(--dust); transition: fill .25s, opacity .25s; }
+svg.focusing .edge, svg.focusing .arrow { opacity: .14; }
+svg.focusing .edge.on { opacity: 1; stroke: var(--text); }
+svg.focusing .arrow.on { opacity: 1; fill: var(--text); }
+svg.focusing .node.dim { opacity: .38; }
+/* This week */
+svg.week .node .bar { transform: scaleX(1); }
+svg.week .node .count { opacity: 1; }
+svg.week .node.idle { opacity: .4; }
+svg.week .node.problem rect.box { stroke: var(--oxide); }
+svg.week .node.decision rect.box { stroke: var(--ochre); }
+svg.week .node.sel rect.box { stroke-width: 1.5; }
+/* Load: columns appear left to right, then each import line draws from its source. */
+.map-scroll svg.boot .node { animation: nodeIn .5s var(--ease) both; animation-delay: calc(var(--col) * 110ms); }
+.map-scroll svg.boot .edge { stroke-dasharray: var(--len); animation: draw .55s var(--ease) both; animation-delay: calc(var(--col) * 110ms + 260ms); }
+.map-scroll svg.boot .arrow { animation: fade .3s both; animation-delay: calc(var(--col) * 110ms + 700ms); }
+@keyframes nodeIn { from { opacity: 0; transform: translateX(-6px); } }
+@keyframes draw { from { stroke-dashoffset: var(--len); } to { stroke-dashoffset: 0; } }
+@keyframes fade { from { opacity: 0; } }
+
+.panel { padding: 20px 22px 24px; min-width: 0; }
+.panel .swap { transition: opacity .18s, transform .18s var(--ease); }
+.panel .swap.out { opacity: 0; transform: translateY(4px); }
+.panel h4 { font-family: var(--serif); font-weight: 400; font-size: 26px; margin: 6px 0 0; }
+.panel .purpose { margin: 10px 0 0; color: var(--text-2); font-family: var(--serif); font-size: 17px; line-height: 1.4; }
+.cite { display: inline-block; font-family: var(--mono); font-size: 10.5px; color: var(--stone); border: 1px solid var(--rule); padding: 0 6px; margin-left: 4px; vertical-align: 2px; }
+.panel section { margin-top: 20px; }
+.panel ul { list-style: none; margin: 8px 0 0; padding: 0; }
+.panel li { border-top: 1px solid var(--rule); padding: 7px 0; font-size: 13px; display: flex; gap: 10px; justify-content: space-between; min-width: 0; }
+.panel li .l { min-width: 0; overflow-wrap: anywhere; }
+.panel li .r { color: var(--dust); font-family: var(--mono); font-size: 11.5px; white-space: nowrap; }
+.panel li button { text-align: left; padding: 0; }
+.panel li button:hover { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.panel .how { color: var(--dust); font-size: 12px; display: block; }
+.panel .wk-item { display: block; }
+.panel .wk-item .top { display: flex; justify-content: space-between; gap: 10px; }
+.panel .wk-item .title { color: var(--text-2); display: block; margin-top: 1px; }
+.st-problem { color: var(--oxide); } .st-decision { color: var(--ochre); } .st-ok { color: var(--stone); }
+.ask { margin-top: 22px; border: 1px solid var(--rule); display: flex; }
+.ask input { flex: 1; min-width: 0; background: transparent; border: 0; color: var(--text); font: inherit; font-size: 13px; padding: 9px 10px; }
+.ask input::placeholder { color: var(--dust); }
+.ask button { border-left: 1px solid var(--rule); padding: 0 14px; font-size: 13px; }
+.ask button:hover { background: var(--text); color: var(--bg); }
+
+/* ——— Player plates (video look in both themes) ——— */
+.player { display: grid; grid-template-columns: minmax(0, 1fr) 340px; }
+@media (max-width: 980px) { .player { grid-template-columns: 1fr; } }
+.player .stage-col { min-width: 0; padding: 18px 20px; border-right: 1px solid var(--rule); }
+@media (max-width: 980px) { .player .stage-col { border-right: 0; border-bottom: 1px solid var(--rule); } }
+.frame { position: relative; aspect-ratio: 16 / 9; max-width: 100%; background: var(--v-ink); color: var(--v-paper); overflow: hidden; }
+.frame svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.frame .hint { position: absolute; top: 3.2%; right: 3%; font-size: clamp(9px, 1.1vw, 12px); letter-spacing: .12em; text-transform: uppercase; color: var(--v-stone); opacity: 0; transition: opacity .3s; pointer-events: none; }
+.frame.paused .hint { opacity: 1; }
+.controls { display: flex; align-items: center; gap: 14px; padding-top: 12px; font-size: 13px; color: var(--stone); }
+.controls .pp { width: 30px; height: 30px; border: 1px solid var(--rule); display: grid; place-items: center; }
+.controls .pp:hover { border-color: var(--stone); }
+.controls .pp svg { width: 11px; height: 11px; fill: var(--text); }
+.controls .time { font-family: var(--mono); font-size: 12px; margin-left: auto; font-variant-numeric: tabular-nums; }
+.chapters { display: flex; gap: 3px; margin-top: 10px; }
+.chapters div { flex: var(--w); min-width: 0; }
+.chapters i { display: block; height: 2px; background: var(--rule); position: relative; overflow: hidden; }
+.chapters i b { position: absolute; inset: 0; background: var(--text); transform-origin: left; transform: scaleX(var(--p, 0)); }
+.chapters span { display: block; font-size: 11px; color: var(--dust); padding-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chapters .cur span { color: var(--text); }
+
+/* Flow diagram in the frame */
+.fnode { cursor: default; }
+.frame.paused .fnode { cursor: pointer; }
+.fnode rect { fill: var(--v-ink2); stroke: var(--v-rule); stroke-width: 2; transition: stroke .25s; }
+.frame.paused .fnode:hover rect, .fnode.sel rect { stroke: var(--v-paper); }
+.fnode .fn { font-family: var(--mono); font-size: 26px; fill: var(--v-paper); }
+.fnode.active rect { stroke: var(--v-paper); }
+.fnode .loc { font-family: var(--mono); font-size: 19px; fill: var(--v-dust); }
+.fnode .tag, .ftag { font-family: var(--sans); font-size: 17px; letter-spacing: .12em; fill: var(--v-stone); }
+.fedge { fill: none; stroke: var(--v-dust); stroke-width: 2; }
+.fedge-hit { fill: none; stroke: transparent; stroke-width: 26; }
+.frame.paused .fedge-hit { cursor: pointer; }
+.frame.paused .fedge-g:hover .fedge, .fedge-g.sel .fedge { stroke: var(--v-paper); }
+.flabel { font-family: var(--mono); font-size: 18px; fill: var(--v-stone); }
+.zrow text { font-family: var(--mono); font-size: 24px; fill: var(--v-code); transition: fill .3s; }
+.zrow rect { fill: transparent; transition: fill .35s; }
+.zrow.scan rect { fill: rgba(235, 230, 218, .06); }
+.zrow.missing text { fill: var(--v-dust); }
+.zrow.missing.hit rect { fill: var(--v-oxide-wash); }
+.zrow.missing.hit text { fill: var(--v-oxide); }
+.err { font-family: var(--mono); font-size: 21px; fill: var(--v-oxide); transition: opacity .3s; }
+.token circle { fill: var(--v-paper); }
+.token text { font-family: var(--sans); font-size: 19px; fill: var(--v-paper); letter-spacing: .04em; }
+.caption { font-family: var(--serif); font-size: 40px; fill: var(--v-paper); }
+.cap-dim { fill: var(--v-stone); }
+
+/* Evidence drawer */
+.drawer { padding: 18px 20px 22px; min-width: 0; }
+.drawer .swap { transition: opacity .18s, transform .18s var(--ease); }
+.drawer .swap.out { opacity: 0; transform: translateY(4px); }
+.drawer h4 { font-family: var(--mono); font-weight: 500; font-size: 16px; margin: 8px 0 0; overflow-wrap: anywhere; }
+.drawer p { color: var(--text-2); font-size: 13.5px; margin: 8px 0 0; }
+.code { margin-top: 14px; border: 1px solid var(--rule); background: var(--surface); overflow-x: auto; font-family: var(--mono); font-size: 12px; line-height: 1.65; padding: 8px 0; }
+.code div { display: grid; grid-template-columns: 3.2em 1fr; white-space: pre-wrap; overflow-wrap: anywhere; padding-right: 12px; }
+.code div span:first-child { color: var(--dust); text-align: right; padding-right: 12px; user-select: none; }
+.code div.cited { background: var(--raise); }
+.code div.defect { background: var(--oxide-wash); }
+.code div.defect span:first-child { color: var(--oxide); }
+.drawer .muted { color: var(--dust); font-size: 12px; margin-top: 10px; }
+
+/* Before and after */
+.ba-frame { position: absolute; inset: 0; padding: 5.5% 6% 0; display: flex; flex-direction: column; }
+@media (max-width: 640px) {
+  .frame.ba { aspect-ratio: auto; }
+  .frame.ba .ba-frame { position: static; padding: 18px 16px 0; }
+  .ba-title { margin-top: 12px; }
+  .matrix { margin-top: 12px; }
+  .ba-foot { padding: 14px 0 16px; }
+}
+.ba-top { display: flex; justify-content: space-between; gap: 16px; font-size: clamp(9px, 1.2vw, 13px); letter-spacing: .12em; text-transform: uppercase; color: var(--v-stone); }
+.ba-title { font-family: var(--serif); font-size: clamp(16px, 2.6vw, 32px); margin-top: 3%; color: var(--v-paper); }
+.matrix { width: 100%; border-collapse: collapse; margin-top: 3%; font-size: clamp(10px, 1.5vw, 19px); font-variant-numeric: tabular-nums; }
+.matrix th { font-family: var(--sans); font-weight: 400; color: var(--v-stone); text-align: left; padding: .5em .6em; border-bottom: 1px solid var(--v-rule); font-size: .8em; letter-spacing: .06em; }
+.matrix td { border-bottom: 1px solid var(--v-rule); padding: 0; height: 2.35em; position: relative; }
+.matrix td.region { font-family: var(--mono); color: var(--v-paper); padding-left: .6em; width: 18%; }
+.cell { position: absolute; inset: 0; overflow: hidden; transition: background .4s; }
+.cell span { position: absolute; left: .6em; top: 50%; font-family: var(--mono); color: var(--v-code); transition: transform .42s var(--ease), opacity .42s; }
+.cell .old { transform: translateY(-50%); }
+.cell .new { transform: translateY(60%); opacity: 0; }
+.cell.flip .old { transform: translateY(-160%); opacity: 0; }
+.cell.flip .new { transform: translateY(-50%); opacity: 1; }
+.cell.crash.flip { background: var(--v-oxide-wash); }
+.cell.crash .new { color: var(--v-oxide); }
+.cell.changed.flip::after { content: ""; position: absolute; left: 0; top: 22%; bottom: 22%; width: 2px; background: var(--v-stone); }
+.cell.crash.flip::after { background: var(--v-oxide); }
+.ba-foot { margin-top: auto; padding: 2.4% 0 3.4%; font-family: var(--serif); font-size: clamp(12px, 1.9vw, 24px); color: var(--v-dim); }
+.ba-foot q { font-style: italic; }
+.ba-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; padding-top: 12px; font-size: 13px; color: var(--stone); }
+
+.notes { margin-top: 72px; border-top: 1px solid var(--rule); padding-top: 20px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px 40px; }
+.notes h3 { font-family: var(--sans); font-size: 13px; font-weight: 500; }
+.notes p { margin: 6px 0 0; color: var(--stone); font-size: 13.5px; }
+@media (max-width: 820px) { .notes { grid-template-columns: 1fr; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <span class="wordmark">Lumi</span>
+    <span class="kicker">Design exploration · Codebase page and diagrams · 30 September 2026</span>
+  </header>
+
+  <div class="intro">
+    <div>
+      <h1>A map of the code, and diagrams you can open</h1>
+    </div>
+    <div>
+      <p>People who let agents run on their own lose track of how the code fits together. These plates show the Codebase page and the two diagrams the task videos gain. All of them use the demo checkout repo and are built from its imports, call sites and diffs.</p>
+      <ol>
+        <li><a href="#codebase"><span class="n">1</span><span class="t">The Codebase page, with this week's agent work layered on</span></a></li>
+        <li><a href="#callpath"><span class="n">2</span><span class="t">In the player: the changed call path, clickable when paused</span></a></li>
+        <li><a href="#beforeafter"><span class="n">3</span><span class="t">In the player: before and after, where only what changed moves</span></a></li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- ——— Plate 1 ——— -->
+  <section class="plate" id="codebase">
+    <div class="plate-head">
+      <div>
+        <h2>The Codebase page</h2>
+        <p>Hover a part to trace what it uses and what uses it. Select one to read what it does, with a citation. Switch to This week to see where agents worked.</p>
+      </div>
+    </div>
+    <div class="screen">
+      <div class="appbar">
+        <span class="wordmark">Lumi</span>
+        <nav><span>Activity</span><span>Digest</span><span aria-current="page">Codebase</span><span>Incidents</span></nav>
+        <span class="who">@adityas0405</span>
+      </div>
+      <div class="cb-head">
+        <div>
+          <div class="kicker">adityas0405/lumi-demo-checkout · main at 4a4057a</div>
+          <h3>Northwind checkout, in seven parts</h3>
+          <div class="sub">Read from the imports on main and the README. Arrows point from a part to what it uses.</div>
+        </div>
+        <div class="seg" role="group" aria-label="Map layer">
+          <button type="button" id="mode-structure" aria-pressed="true">Structure</button>
+          <button type="button" id="mode-week" aria-pressed="false">This week</button>
+        </div>
+      </div>
+      <div class="cb-body">
+        <div class="map-col"><div class="stick">
+          <div class="map-scroll"><svg id="map" viewBox="0 0 880 420" role="img" aria-label="Module map of the checkout repo"></svg></div>
+          <div class="legend" id="legend" data-mode="structure">
+            <span class="st"><span class="sw" style="border-color: var(--dust)"></span>Uses (from real imports)</span>
+            <span class="st">Box: one part of the code</span>
+            <span class="wk">Bar: lines agents changed this week, tests excluded</span>
+            <span class="wk"><span class="sw" style="border-color: var(--clay)"></span>Claude Code</span>
+            <span class="wk"><span class="sw" style="border-color: var(--slate)"></span>Cursor</span>
+            <span class="wk"><span class="sw" style="border-color: var(--sage)"></span>Devin</span>
+            <span class="wk"><span class="sw" style="border-color: var(--oxide)"></span>A problem</span>
+            <span class="wk"><span class="sw" style="border-color: var(--ochre)"></span>Waiting on you</span>
+          </div>
+          <div class="facts">
+            <div><span class="kicker">Entry point</span><span class="mono">src/main.tsx</span> mounts the App shell</div>
+            <div><span class="kicker">Packages</span>react, react-dom, date-fns <span style="color: var(--dust)">(added by Devin in #61, Sep 27)</span></div>
+            <div><span class="kicker">Outside the map</span><span class="mono">README.md</span> <span style="color: var(--dust)">(Cursor, #59, docs only)</span></div>
+          </div>
+        </div></div>
+        <aside class="panel" aria-live="polite"><div class="swap" id="panel"></div></aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ——— Plate 2 ——— -->
+  <section class="plate" id="callpath">
+    <div class="plate-head">
+      <div>
+        <h2>In the player: the changed call path</h2>
+        <p>PR #60, "What changed". A New York cart travels the path the change created. Pause, then select any box or arrow to open the code behind it.</p>
+      </div>
+    </div>
+    <div class="screen">
+      <div class="appbar">
+        <span class="wordmark">Lumi</span>
+        <nav><span>Activity</span><span>Digest</span><span>Codebase</span><span>Incidents</span></nav>
+        <span class="who">PR #60 · Cursor</span>
+      </div>
+      <div class="player">
+        <div class="stage-col">
+          <div class="frame" id="flow-frame">
+            <svg id="flow" viewBox="0 0 1600 900" role="img" aria-label="Call path from the checkout page to the shipping zone table"></svg>
+            <div class="hint">Paused · select any part of the diagram</div>
+          </div>
+          <div class="controls">
+            <button type="button" class="pp" id="flow-pp" aria-label="Play"><svg viewBox="0 0 10 10" id="flow-pp-icon"><path d="M1 0 L9 5 L1 10 Z"></path></svg></button>
+            <span id="flow-state">Paused</span>
+            <span class="time" id="flow-time">0:41 / 1:30</span>
+          </div>
+          <div class="chapters" id="flow-chapters"></div>
+        </div>
+        <aside class="drawer" aria-live="polite"><div class="swap" id="drawer"></div></aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ——— Plate 3 ——— -->
+  <section class="plate" id="beforeafter">
+    <div class="plate-head">
+      <div>
+        <h2>In the player: before and after</h2>
+        <p>When a change alters behaviour, the video shows the behaviour, not just the diff. Cells that stay the same don't move; the eye goes where the change is.</p>
+      </div>
+    </div>
+    <div class="screen">
+      <div class="player" style="grid-template-columns: 1fr;">
+        <div class="stage-col" style="border-right: 0;">
+          <div class="frame ba">
+            <div class="ba-frame">
+              <div class="ba-top"><span>PR #60 · Zone-based express shipping rates</span><span>What changed</span></div>
+              <div class="ba-title" id="ba-title">What a $40 cart pays for shipping, before the change</div>
+              <table class="matrix" id="matrix">
+                <thead><tr><th>Destination</th><th>Standard</th><th>Express</th><th>Standard, over $75</th></tr></thead>
+                <tbody></tbody>
+              </table>
+              <div class="ba-foot">The request said <q>We ship to CA, OR, TX, NY and WA.</q> <span class="cite" style="border-color: var(--v-rule); color: var(--v-stone)">task:29</span></div>
+            </div>
+          </div>
+          <div class="ba-controls">
+            <div class="seg" role="group" aria-label="Version">
+              <button type="button" id="ba-before" aria-pressed="true">Before</button>
+              <button type="button" id="ba-after" aria-pressed="false">After #60</button>
+            </div>
+            <span>Values come from running the base and head versions of <span class="mono">shippingFor</span> on a $40, 1.2 kg cart.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="notes">
+    <div>
+      <h3>Every line is read from the code</h3>
+      <p>Boxes and arrows come from imports, call sites and the diff. The model picks which diagram fits and writes the labels. Anything it names that isn't in the code is dropped, the same rule as for citations.</p>
+    </div>
+    <div>
+      <h3>One diagram system</h3>
+      <p>The same component draws the Codebase page, renders into the video, and runs live in the player. Pausing turns the picture into the real thing: each part opens its code, and Ask can answer about what's selected.</p>
+    </div>
+    <div>
+      <h3>Motion explains, then stops</h3>
+      <p>The map draws in the direction its arrows read. The trace follows the path the code runs. The table moves only the cells that changed. Nothing loops, and reduced-motion settings turn it all off.</p>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs = {}, parent) => {
+    const n = document.createElementNS(NS, tag);
+    for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+    if (parent) parent.appendChild(n);
+    return n;
+  };
+  const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const swap = (box, html) => {
+    if (reduce) { box.innerHTML = html; return; }
+    box.classList.add("out");
+    setTimeout(() => { box.innerHTML = html; box.classList.remove("out"); }, 160);
+  };
+
+  /* ——— Plate 1: the module map ——— */
+  const AGENT = { claude: ["Claude Code", "var(--clay)"], cursor: ["Cursor", "var(--slate)"], devin: ["Devin", "var(--sage)"] };
+  const W = 140, H = 56;
+  const MODULES = [
+    { id: "app", name: "App shell", path: "main.tsx · App.tsx", x: 10, y: 60, col: 0,
+      purpose: "Mounts the checkout page and keeps the cart in state.", cite: "code:src/App.tsx",
+      files: [["src/App.tsx", 56], ["src/main.tsx", 10]], week: [] },
+    { id: "ui", name: "Screens", path: "src/ui", x: 10, y: 260, col: 0,
+      purpose: "The checkout page: cart lines, the summary with coupon entry, and the order confirmation.", cite: "doc:README.md",
+      files: [["Checkout.tsx", 74], ["CartSummary.tsx", 60], ["OrderConfirmation.tsx", 21]],
+      week: [
+        { a: "claude", pr: 63, lines: 172, st: "decision", s: "Needs your decision", t: "Order history: filtering, search, keyset pagination and CSV export" },
+        { a: "cursor", pr: 62, lines: 18, st: "ok", s: "Merged", t: "Clearer checkout button: show the amount and a lock icon" },
+        { a: "devin", pr: 61, lines: 6, st: "ok", s: "Merged", t: "Use date-fns for the order confirmation timestamp" },
+      ] },
+    { id: "checkout", name: "Checkout", path: "src/checkout", x: 250, y: 60, col: 1,
+      purpose: "Cart, coupons, shipping and order totals.", cite: "doc:README.md",
+      files: [["cart.ts", 51], ["shipping.ts", 32], ["totals.ts", 31], ["discounts.ts", 18]],
+      week: [
+        { a: "cursor", pr: 60, lines: 22, st: "problem", s: "Linked to an incident", t: "Zone-based express shipping rates" },
+        { a: "claude", pr: 58, lines: 0, tests: 60, st: "ok", s: "Tests only · merged", t: "Add validation tests for cart quantities and coupons" },
+      ] },
+    { id: "orders", name: "Orders", path: "src/orders", x: 250, y: 340, col: 1,
+      purpose: "Order history. Nothing in the app uses it yet; #63 adds the screen.", cite: "doc:README.md",
+      files: [["history.ts", 17]],
+      week: [{ a: "claude", pr: 63, lines: 482, st: "decision", s: "Needs your decision", t: "Order history: filtering, search, keyset pagination and CSV export" }] },
+    { id: "payments", name: "Payments", path: "src/payments", x: 490, y: 20, col: 2,
+      purpose: "Sales tax and refunds.", cite: "doc:README.md",
+      files: [["refunds.ts", 35], ["tax.ts", 21]],
+      week: [
+        { a: "devin", pr: 64, lines: 25, st: "problem", s: "Blocked by triage", t: "Harden refund validation against over-refunds" },
+        { a: "claude", pr: 65, lines: 11, st: "decision", s: "Needs your decision", t: "Round sales tax half-even to match the processor's tax report" },
+      ] },
+    { id: "catalog", name: "Catalog", path: "src/catalog.ts", x: 730, y: 150, col: 3,
+      purpose: "The products on sale and their prices.", cite: "code:src/catalog.ts",
+      files: [["src/catalog.ts", 46]], week: [] },
+    { id: "money", name: "Money", path: "src/money.ts", x: 730, y: 340, col: 3,
+      purpose: "All money is integer cents: formatting and checks.", cite: "doc:README.md",
+      files: [["src/money.ts", 11]],
+      week: [{ a: "claude", pr: 65, lines: 14, st: "decision", s: "Needs your decision", t: "Round sales tax half-even to match the processor's tax report" }] },
+  ];
+  const EDGES = [
+    ["app", "ui", "App.tsx renders Checkout, CartSummary and OrderConfirmation"],
+    ["app", "checkout", "App.tsx calls addLine, lookupCoupon and computeTotals"],
+    ["ui", "checkout", "uses the Cart and Totals types"],
+    ["ui", "payments", "Checkout.tsx reads TAX_RATES"],
+    ["ui", "catalog", "Checkout.tsx calls findProduct"],
+    ["ui", "money", "calls formatCents"],
+    ["checkout", "payments", "totals.ts calls taxFor"],
+    ["checkout", "catalog", "cart.ts calls findProduct"],
+    ["checkout", "money", "uses the Cents type"],
+    ["payments", "money", "refunds.ts calls assertCents"],
+    ["catalog", "money", "uses the Cents type"],
+    ["orders", "money", "uses the Cents type"],
+  ];
+  const byId = Object.fromEntries(MODULES.map((m) => [m.id, m]));
+  const MAX_LINES = 482;
+  const svg = document.getElementById("map");
+  const defs = el("defs", {}, svg);
+  const edgeLayer = el("g", {}, svg);
+  const nodeLayer = el("g", {}, svg);
+  const edgeEls = [];
+
+  EDGES.forEach(([from, to]) => {
+    const a = byId[from], b = byId[to];
+    let d, end;
+    if (a.col === b.col) {
+      const x = a.x + W / 2;
+      d = `M${x},${a.y + H} L${x},${b.y - 6}`;
+      end = [x, b.y, 90];
+    } else {
+      const x1 = a.x + W, y1 = a.y + H / 2, x2 = b.x - 6, y2 = b.y + H / 2;
+      const mx = (x1 + x2) / 2;
+      d = `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`;
+      end = [b.x, y2, 0];
+    }
+    const p = el("path", { d, class: "edge" }, edgeLayer);
+    const len = p.getTotalLength();
+    p.style.setProperty("--len", len.toFixed(1));
+    p.style.setProperty("--col", a.col);
+    const [ex, ey, rot] = end;
+    const arrow = el("path", { d: "M0,0 L-7,-3.5 L-7,3.5 Z", class: "arrow", transform: `translate(${ex},${ey}) rotate(${rot})` }, edgeLayer);
+    arrow.style.setProperty("--col", a.col);
+    edgeEls.push({ from, to, p, arrow });
+  });
+
+  const nodeEls = {};
+  MODULES.forEach((m) => {
+    const pos = el("g", { transform: `translate(${m.x},${m.y})` }, nodeLayer);
+    const g = el("g", { class: "node", tabindex: "0", role: "button", "aria-label": `${m.name}, ${m.path}` }, pos);
+    g.style.setProperty("--col", m.col);
+    el("rect", { class: "box", width: W, height: H, rx: 1 }, g);
+    el("text", { class: "name", x: 14, y: 25 }, g).textContent = m.name;
+    el("text", { class: "path", x: 14, y: 42 }, g).textContent = m.path;
+    // This week: one bar per module, split by agent, scaled to the busiest module.
+    const total = m.week.reduce((s, w) => s + w.lines, 0);
+    const barW = (W - 28) * (total / MAX_LINES);
+    let x = 14;
+    const bar = el("g", { class: "bar" }, g);
+    const byAgent = {};
+    m.week.forEach((w) => { byAgent[w.a] = (byAgent[w.a] || 0) + w.lines; });
+    for (const [a, n] of Object.entries(byAgent)) {
+      if (!n) continue;
+      const w = Math.max(2, barW * (n / total));
+      el("rect", { x, y: H - 7, width: w, height: 2.5, fill: AGENT[a][1] }, bar);
+      x += w + 1;
+    }
+    if (total) el("text", { class: "count", x: W - 12, y: 25, "text-anchor": "end" }, g).textContent = total;
+    const worst = m.week.some((w) => w.st === "problem") ? "problem" : m.week.some((w) => w.st === "decision") ? "decision" : null;
+    if (worst) g.classList.add(worst);
+    if (!total) g.classList.add("idle");
+    nodeEls[m.id] = g;
+  });
+
+  if (!reduce) {
+    svg.classList.add("boot");
+    setTimeout(() => svg.classList.remove("boot"), 1600);
+  }
+
+  const focus = (id) => {
+    if (!id) { svg.classList.remove("focusing"); return; }
+    svg.classList.add("focusing");
+    const near = new Set([id]);
+    edgeEls.forEach((e) => {
+      const on = e.from === id || e.to === id;
+      e.p.classList.toggle("on", on); e.arrow.classList.toggle("on", on);
+      if (on) { near.add(e.from); near.add(e.to); }
+    });
+    for (const [k, g] of Object.entries(nodeEls)) g.classList.toggle("dim", !near.has(k));
+  };
+
+  let mode = "structure";
+  let selected = "checkout";
+  const panel = document.getElementById("panel");
+  const renderPanel = (id, animate = true) => {
+    const m = byId[id];
+    const uses = EDGES.filter((e) => e[0] === id);
+    const usedBy = EDGES.filter((e) => e[1] === id);
+    const link = (other, how) =>
+      `<li><span class="l"><button type="button" data-go="${other}">${esc(byId[other].name)}</button><span class="how">${esc(how)}</span></span></li>`;
+    const week = m.week.length
+      ? m.week.map((w) => `<li><span class="wk-item l"><span class="top"><span><span style="color:${AGENT[w.a][1]}">${AGENT[w.a][0]}</span> <span class="mono" style="color:var(--dust)">#${w.pr}</span></span><span class="st-${w.st}">${w.s}</span></span><span class="title">${esc(w.t)}</span><span class="how">${w.lines ? `${w.lines} lines here` : `${w.tests} test lines`}</span></span></li>`).join("")
+      : `<li><span class="l" style="color:var(--dust)">No agent work here this week.</span></li>`;
+    const html = `
+      <div class="kicker">${esc(m.path)}</div>
+      <h4>${esc(m.name)}</h4>
+      <p class="purpose">${esc(m.purpose)}<span class="cite">${esc(m.cite)}</span></p>
+      ${mode === "week" ? `<section><div class="kicker">This week</div><ul>${week}</ul></section>` : ""}
+      <section><div class="kicker">Used by</div><ul>${usedBy.length ? usedBy.map((e) => link(e[0], e[2])).join("") : `<li><span class="l" style="color:var(--dust)">Nothing on main yet.</span></li>`}</ul></section>
+      <section><div class="kicker">Uses</div><ul>${uses.length ? uses.map((e) => link(e[1], e[2])).join("") : `<li><span class="l" style="color:var(--dust)">Nothing else in the repo.</span></li>`}</ul></section>
+      <section><div class="kicker">Files</div><ul>${m.files.map(([f, n]) => `<li><span class="l mono" style="font-size:12px">${esc(f)}</span><span class="r">${n} lines</span></li>`).join("")}</ul></section>
+      <form class="ask" onsubmit="event.preventDefault()"><input id="ask-module" placeholder="Ask about ${esc(m.name)}" aria-label="Ask about ${esc(m.name)}"><button type="submit">Ask</button></form>`;
+    animate ? swap(panel, html) : (panel.innerHTML = html);
+  };
+  const select = (id) => {
+    selected = id;
+    for (const [k, g] of Object.entries(nodeEls)) g.classList.toggle("sel", k === id);
+    renderPanel(id);
+  };
+  panel.addEventListener("click", (e) => {
+    const go = e.target.closest("[data-go]");
+    if (go) select(go.dataset.go);
+  });
+  for (const [id, g] of Object.entries(nodeEls)) {
+    g.addEventListener("mouseenter", () => focus(id));
+    g.addEventListener("mouseleave", () => focus(null));
+    g.addEventListener("focus", () => focus(id));
+    g.addEventListener("blur", () => focus(null));
+    g.addEventListener("click", () => select(id));
+    g.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(id); } });
+  }
+  nodeEls[selected].classList.add("sel");
+  renderPanel(selected, false);
+
+  const legend = document.getElementById("legend");
+  const setMode = (m) => {
+    mode = m;
+    document.getElementById("mode-structure").setAttribute("aria-pressed", m === "structure");
+    document.getElementById("mode-week").setAttribute("aria-pressed", m === "week");
+    svg.classList.toggle("week", m === "week");
+    legend.dataset.mode = m;
+    // Bars grow in reading order, a beat apart.
+    if (!reduce) Object.values(byId).forEach((mod) => {
+      nodeEls[mod.id].querySelector(".bar").style.transitionDelay = m === "week" ? `${mod.col * 70 + 120}ms` : "0ms";
+    });
+    renderPanel(selected);
+  };
+  document.getElementById("mode-structure").addEventListener("click", () => setMode("structure"));
+  document.getElementById("mode-week").addEventListener("click", () => setMode("week"));
+
+  /* ——— Plate 2: the call path ——— */
+  const flow = document.getElementById("flow");
+  const frame = document.getElementById("flow-frame");
+  el("text", { x: 60, y: 92, class: "ftag", style: "font-size:22px" }, flow).textContent = "PR #60 · ZONE-BASED EXPRESS SHIPPING RATES · SRC/CHECKOUT";
+  const FN = [
+    { id: "page", fn: "Checkout page", loc: "App.tsx:24", x: 60, sans: true },
+    { id: "totals", fn: "computeTotals", loc: "totals.ts:17", x: 380, changed: true },
+    { id: "shipping", fn: "shippingFor", loc: "shipping.ts:21", x: 700, changed: true },
+    { id: "zone", fn: "zoneFor", loc: "shipping.ts:17", x: 1020, changed: true },
+  ];
+  const FW = 230, FH = 118, FY = 300;
+  const fnodes = {};
+  const fedges = [];
+  const edgeDefs = [
+    { id: "e1", from: "page", to: "totals", label: "line 24" },
+    { id: "e2", from: "totals", to: "shipping", label: "line 21 · now passes region" },
+    { id: "e3", from: "shipping", to: "zone", label: "line 27" },
+  ];
+  const edgeG = el("g", {}, flow);
+  const nodeG = el("g", {}, flow);
+  FN.forEach((n) => {
+    const g = el("g", { class: "fnode", transform: `translate(${n.x},${FY})`, tabindex: "-1" }, nodeG);
+    el("rect", { width: FW, height: FH, rx: 2 }, g);
+    const t = el("text", { class: "fn", x: 22, y: 56 }, g);
+    t.textContent = n.fn;
+    if (n.sans) t.setAttribute("style", "font-family: var(--serif); font-size: 30px;");
+    el("text", { class: "loc", x: 22, y: 92 }, g).textContent = n.loc;
+    if (n.changed) el("text", { class: "tag", x: 0, y: -16 }, g).textContent = "CHANGED";
+    fnodes[n.id] = g;
+  });
+  edgeDefs.forEach((e) => {
+    const a = FN.find((n) => n.id === e.from), b = FN.find((n) => n.id === e.to);
+    const x1 = a.x + FW, x2 = b.x, y = FY + FH / 2;
+    const g = el("g", { class: "fedge-g" }, edgeG);
+    const p = el("path", { d: `M${x1},${y} L${x2 - 4},${y}`, class: "fedge" }, g);
+    el("path", { d: `M${x2 - 2},${y} l-12,-6 l0,12 z`, fill: "var(--v-dust)" }, g);
+    el("path", { d: `M${x1},${y} L${x2},${y}`, class: "fedge-hit" }, g);
+    const lbl = el("text", { class: "flabel", x: (x1 + x2) / 2, y: y + 44, "text-anchor": "middle" }, g);
+    lbl.textContent = e.label.split(" · ")[0];
+    fedges.push({ ...e, g, p });
+  });
+  // The zone table the lookup reads
+  const TX0 = 1340, TY0 = 250, TW = 220;
+  const table = el("g", { class: "fnode", transform: `translate(${TX0},${TY0})`, tabindex: "-1" }, nodeG);
+  el("rect", { width: TW, height: 382, rx: 2 }, table);
+  el("text", { class: "fn", x: 20, y: 50, style: "font-size:22px" }, table).textContent = "SHIPPING_ZONES";
+  el("text", { class: "loc", x: 20, y: 80 }, table).textContent = "shipping.ts:9";
+  el("text", { class: "tag", x: 0, y: -16 }, table).textContent = "NEW";
+  fnodes.table = table;
+  const ZROWS = [["CA", "zone 1"], ["OR", "zone 1"], ["TX", "zone 2"], ["NY", "missing"], ["WA", "missing"]];
+  const zrowEls = ZROWS.map(([r, z], i) => {
+    const g = el("g", { class: "zrow" + (z === "missing" ? " missing" : ""), transform: `translate(0,${104 + i * 52})` }, table);
+    el("rect", { x: 1, y: 0, width: TW - 2, height: 46 }, g);
+    el("text", { x: 20, y: 32 }, g).textContent = r;
+    el("text", { x: 86, y: 32 }, g).textContent = z;
+    return g;
+  });
+  // zoneFor -> table
+  (() => {
+    const x1 = 1020 + FW, y1 = FY + FH / 2, x2 = TX0;
+    const g = el("g", { class: "fedge-g" }, edgeG);
+    el("path", { d: `M${x1},${y1} L${x2 - 4},${y1}`, class: "fedge" }, g);
+    el("path", { d: `M${x2 - 2},${y1} l-12,-6 l0,12 z`, fill: "var(--v-dust)" }, g);
+    el("path", { d: `M${x1},${y1} L${x2},${y1}`, class: "fedge-hit" }, g);
+    el("text", { class: "flabel", x: (x1 + x2) / 2, y: y1 + 44, "text-anchor": "middle" }, g).textContent = "line 18";
+    fedges.push({ id: "e4", from: "zone", to: "table", label: "line 18", g });
+  })();
+  const err = el("text", { class: "err", x: TX0 + TW, y: TY0 + 382 + 44, "text-anchor": "end" }, flow);
+  err.textContent = "TypeError: Cannot read properties of undefined (reading 'zone')";
+  // Token and caption
+  const token = el("g", { class: "token", opacity: 0 }, flow);
+  el("circle", { r: 9 }, token);
+  el("text", { x: 0, y: -22, "text-anchor": "middle" }, token).textContent = "NY cart";
+  const cap = el("text", { class: "caption", x: 800, y: 790, "text-anchor": "middle" }, flow);
+  const CAPS = [
+    [0, "A New York cart reaches checkout."],
+    [1.6, "computeTotals now hands the region to shippingFor."],
+    [3.3, "shippingFor asks zoneFor for the cart's zone."],
+    [4.9, "zoneFor looks New York up in the zone table."],
+    [6.5, "New York isn't in it, so the lookup throws and checkout fails."],
+  ];
+  const REST_CAP = "New York isn't in it, so the lookup throws and checkout fails.";
+  cap.textContent = REST_CAP;
+
+  const ORDER = ["page", "totals", "shipping", "zone", "table"];
+  const lefts = [60, 380, 700, 1020, TX0];
+  const LINE_Y = FY + FH / 2;
+  const DUR = 8.2;
+  let playing = false, t0 = 0, raf = 0;
+  const chapters = [["Context", 14], ["What changed", 30], ["Why", 12], ["How it was checked", 14], ["Open risks", 10], ["Decision", 10]];
+  const chWrap = document.getElementById("flow-chapters");
+  chapters.forEach(([n, w], i) => {
+    const d = document.createElement("div");
+    d.style.setProperty("--w", w);
+    if (i === 1) d.className = "cur";
+    d.innerHTML = `<i><b style="--p:${i === 0 ? 1 : 0}"></b></i><span>${n}</span>`;
+    chWrap.appendChild(d);
+  });
+  const curBar = chWrap.children[1].querySelector("b");
+  const lerp = (a, b, k) => a + (b - a) * k;
+  const ease = (k) => 1 - Math.pow(1 - k, 3);
+  const setRest = () => {
+    token.setAttribute("opacity", 0);
+    zrowEls.forEach((r) => r.classList.remove("scan"));
+    zrowEls[3].classList.add("hit");
+    Object.values(fnodes).forEach((g) => g.classList.remove("active"));
+    err.style.opacity = 1;
+    cap.textContent = REST_CAP;
+    curBar.style.setProperty("--p", 0.62);
+  };
+  const frameAt = (t) => {
+    // Travel along the four hops, then scan the table rows.
+    const hop = 1.6;
+    zrowEls.forEach((r) => r.classList.remove("scan", "hit"));
+    err.style.opacity = 0;
+    let active = null, show = false, x = 0;
+    if (t < hop * 4) {
+      // Each hop: a beat inside the current box, then across the arrow to the next.
+      const i = Math.min(3, Math.floor(t / hop));
+      const k = (t - i * hop) / hop;
+      if (k < 0.3) active = ORDER[i];
+      else {
+        show = true;
+        x = lerp(lefts[i] + FW + 14, lefts[i + 1] - 16, ease((k - 0.3) / 0.7));
+      }
+    } else {
+      active = "table";
+      const scan = Math.min(3, Math.floor((t - hop * 4) / 0.32));
+      zrowEls[scan].classList.add(scan === 3 ? "hit" : "scan");
+      if (scan === 3) err.style.opacity = 1;
+    }
+    for (const [id, g] of Object.entries(fnodes)) g.classList.toggle("active", id === active);
+    token.setAttribute("transform", `translate(${x},${LINE_Y})`);
+    token.setAttribute("opacity", show ? 1 : 0);
+    let c = CAPS[0][1];
+    for (const [at, s] of CAPS) if (t >= at) c = s;
+    cap.textContent = c;
+    curBar.style.setProperty("--p", 0.3 + 0.32 * (t / DUR));
+    document.getElementById("flow-time").textContent = `0:${String(33 + Math.floor(t)).padStart(2, "0")} / 1:30`;
+  };
+  const setPlaying = (p) => {
+    playing = p;
+    frame.classList.toggle("paused", !p);
+    document.getElementById("flow-state").textContent = p ? "Playing" : "Paused";
+    document.getElementById("flow-pp").setAttribute("aria-label", p ? "Pause" : "Play");
+    document.getElementById("flow-pp-icon").innerHTML = p ? '<path d="M1 0h3v10H1zM6 0h3v10H6z"/>' : '<path d="M1 0 L9 5 L1 10 Z"/>';
+  };
+  const tick = (now) => {
+    const t = (now - t0) / 1000;
+    if (t >= DUR) { setRest(); setPlaying(false); return; }
+    frameAt(t);
+    raf = requestAnimationFrame(tick);
+  };
+  const play = () => {
+    if (reduce) { setRest(); return; }
+    cancelAnimationFrame(raf);
+    t0 = performance.now();
+    setPlaying(true);
+    raf = requestAnimationFrame(tick);
+  };
+  const pause = () => { cancelAnimationFrame(raf); setPlaying(false); token.setAttribute("opacity", 0); };
+  document.getElementById("flow-pp").addEventListener("click", () => (playing ? pause() : play()));
+  setRest();
+  setPlaying(false);
+
+  // Evidence behind each part of the diagram (real lines from the PR's head).
+  const CODE = {
+    page: { title: "src/App.tsx", start: 22, cited: [24], lines: [
+      "  const [cart, setCart] = useState<Cart>(initialCart);",
+      "  const [couponError, setCouponError] = useState<string | null>(null);",
+      "  const totals = useMemo(() => computeTotals(cart), [cart]);" ],
+      note: "The checkout page recomputes totals on every cart change, including the region picker." },
+    totals: { title: "src/checkout/totals.ts", start: 17, cited: [21], lines: [
+      "export function computeTotals(cart: Cart): Totals {",
+      "  const subtotalCents = subtotal(cart);",
+      "  const discountCents = discountFor(cart.coupon, subtotalCents);",
+      "  const taxable = subtotalCents - discountCents;",
+      "  const shippingCents = shippingFor(cart.shippingMethod, taxable, totalWeight(cart), cart.region);" ],
+      note: "Changed in #60: the region is now passed to shipping for every cart." },
+    shipping: { title: "src/checkout/shipping.ts", start: 21, cited: [27], lines: [
+      "export function shippingFor(",
+      "  method: \"standard\" | \"express\",",
+      "  subtotalCents: Cents,",
+      "  weightGrams: number,",
+      "  region: string,",
+      "): Cents {",
+      "  const zone = zoneFor(region);",
+      "  if (method === \"standard\" && subtotalCents >= FREE_SHIPPING_THRESHOLD) return 0;" ],
+      note: "The zone is looked up before the standard-shipping early return, so standard carts depend on it too." },
+    zone: { title: "src/checkout/shipping.ts", start: 17, cited: [], defect: [18], lines: [
+      "export function zoneFor(region: string): 1 | 2 {",
+      "  return SHIPPING_ZONES[region]!.zone;",
+      "}" ],
+      note: "The ! tells TypeScript the region is always listed. For NY and WA it isn't, and .zone throws." },
+    table: { title: "src/checkout/shipping.ts", start: 9, cited: [10, 11, 12], lines: [
+      "const SHIPPING_ZONES: Record<string, { zone: 1 | 2 }> = {",
+      "  CA: { zone: 1 },",
+      "  OR: { zone: 1 },",
+      "  TX: { zone: 2 },",
+      "};" ],
+      note: "Three regions. The request that asked for this change lists five: CA, OR, TX, NY and WA." },
+    e2: { title: "src/checkout/totals.ts · call site", start: 21, cited: [21], lines: [
+      "  const shippingCents = shippingFor(cart.shippingMethod, taxable, totalWeight(cart), cart.region);" ],
+      note: "The one-line change that connects every checkout to the zone table." },
+  };
+  const LABEL = { page: "Checkout page", totals: "computeTotals", shipping: "shippingFor", zone: "zoneFor", table: "SHIPPING_ZONES", e1: "Checkout page → computeTotals", e2: "computeTotals → shippingFor", e3: "shippingFor → zoneFor", e4: "zoneFor → SHIPPING_ZONES" };
+  const drawer = document.getElementById("drawer");
+  const renderDrawer = (id, animate = true) => {
+    const key = CODE[id] ? id : { e1: "page", e3: "shipping", e4: "zone" }[id];
+    const c = CODE[key];
+    const rows = c.lines.map((l, i) => {
+      const n = c.start + i;
+      const cls = (c.defect || []).includes(n) ? "defect" : c.cited.includes(n) ? "cited" : "";
+      return `<div class="${cls}"><span>${n}</span><span>${esc(l)}</span></div>`;
+    }).join("");
+    const html = `
+      <div class="kicker">Evidence · ${esc(LABEL[id])}</div>
+      <h4>${esc(c.title)}</h4>
+      <div class="code">${rows}</div>
+      <p>${esc(c.note)}</p>
+      <form class="ask" onsubmit="event.preventDefault()"><input id="ask-flow" placeholder="Ask about ${esc(LABEL[id].split(" → ").pop())}" aria-label="Ask about the selected part"><button type="submit">Ask</button></form>
+      <div class="muted">Answers come only from this change's evidence.</div>`;
+    animate ? swap(drawer, html) : (drawer.innerHTML = html);
+  };
+  const clearSel = () => { Object.values(fnodes).forEach((g) => g.classList.remove("sel")); fedges.forEach((e) => e.g.classList.remove("sel")); };
+  const pick = (id, g) => {
+    if (playing) pause();
+    clearSel();
+    g.classList.add("sel");
+    renderDrawer(id);
+  };
+  for (const [id, g] of Object.entries(fnodes)) g.addEventListener("click", () => pick(id, g));
+  fedges.forEach((e) => e.g.addEventListener("click", () => pick(e.id, e.g)));
+  fnodes.zone.classList.add("sel");
+  renderDrawer("zone", false);
+
+  // Play the trace once, the first time the plate is on screen.
+  const once = new IntersectionObserver((entries) => {
+    if (entries.some((e) => e.isIntersecting)) { once.disconnect(); setTimeout(play, 400); }
+  }, { threshold: 0.6 });
+  if (!reduce) once.observe(frame);
+
+  /* ——— Plate 3: before and after ——— */
+  const ROWS = [
+    ["CA", ["$5.99", "$15.00", "Free"], ["$5.99", "$12.00", "Free"]],
+    ["OR", ["$5.99", "$15.00", "Free"], ["$5.99", "$12.00", "Free"]],
+    ["TX", ["$5.99", "$15.00", "Free"], ["$5.99", "$19.00", "Free"]],
+    ["NY", ["$5.99", "$15.00", "Free"], ["Throws", "Throws", "Throws"]],
+    ["WA", ["$5.99", "$15.00", "Free"], ["Throws", "Throws", "Throws"]],
+  ];
+  const tbody = document.querySelector("#matrix tbody");
+  const cells = [];
+  ROWS.forEach(([r, before, after], ri) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td class="region">${r}</td>`;
+    before.forEach((b, ci) => {
+      const a = after[ci];
+      const td = document.createElement("td");
+      const changed = a !== b;
+      td.innerHTML = `<div class="cell${changed ? " changed" : ""}${a === "Throws" ? " crash" : ""}"><span class="old">${b}</span><span class="new">${a}</span></div>`;
+      const cell = td.firstChild;
+      if (changed) cells.push({ cell, delay: ri * 70 + ci * 35 });
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  const baTitle = document.getElementById("ba-title");
+  const setBA = (after) => {
+    document.getElementById("ba-before").setAttribute("aria-pressed", !after);
+    document.getElementById("ba-after").setAttribute("aria-pressed", after);
+    baTitle.textContent = after ? "What a $40 cart pays for shipping, after #60" : "What a $40 cart pays for shipping, before the change";
+    cells.forEach(({ cell, delay }) => {
+      cell.style.transitionDelay = reduce ? "0ms" : `${after ? delay : 0}ms`;
+      cell.querySelectorAll("span").forEach((s) => (s.style.transitionDelay = cell.style.transitionDelay));
+      cell.classList.toggle("flip", after);
+    });
+  };
+  document.getElementById("ba-before").addEventListener("click", () => setBA(false));
+  document.getElementById("ba-after").addEventListener("click", () => setBA(true));
+  const baObs = new IntersectionObserver((entries) => {
+    if (entries.some((e) => e.isIntersecting)) { baObs.disconnect(); setTimeout(() => setBA(true), reduce ? 0 : 700); }
+  }, { threshold: 0.6 });
+  baObs.observe(document.getElementById("matrix"));
+})();
+</script>

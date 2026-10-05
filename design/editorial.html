@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lumi editorial system</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Schibsted+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* Lumi editorial tokens (shared by the video and the review app) */
+  :root {
+    --ink: #0f0e0c;        /* background */
+    --ink-2: #161512;      /* raised surface */
+    --rule: #2a2824;       /* hairlines */
+    --paper: #ebe6da;      /* primary text */
+    --stone: #a29c8f;      /* secondary text */
+    --dust: #6d685e;       /* tertiary text, removed lines */
+    --oxide: #c55d3c;      /* problems: the one loud colour */
+    --ochre: #bf9f5f;      /* uncertainty */
+    --clay: #b77a5e;       /* Claude Code */
+    --slate: #8b9bb3;      /* Cursor */
+    --sage: #95a585;       /* Devin */
+    --serif: "Newsreader", Georgia, serif;
+    --sans: "Schibsted Grotesk", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #0b0a09; color: var(--paper); font-family: var(--sans); }
+  main { max-width: 1240px; margin: 0 auto; padding: 56px 16px 96px; }
+  header.page h1 { font-family: var(--serif); font-weight: 400; font-size: 34px; margin: 0 0 8px; letter-spacing: -0.01em; }
+  header.page p { color: var(--stone); max-width: 760px; line-height: 1.55; margin: 0 0 40px; }
+  h2.section { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--stone); font-weight: 500; margin: 48px 0 16px; padding-top: 16px; border-top: 1px solid var(--rule); }
+
+  .tokens { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+  .sw { border-top: 1px solid var(--rule); padding-top: 10px; font-size: 13px; }
+  .sw i { display: block; height: 44px; margin-bottom: 8px; border: 1px solid var(--rule); }
+  .sw span { color: var(--stone); font-family: var(--mono); font-size: 12px; }
+  .type { display: grid; gap: 18px; }
+  .type div { display: grid; grid-template-columns: 160px 1fr; gap: 16px; align-items: baseline; }
+  .type small { color: var(--stone); font-size: 12px; }
+
+  .frames { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 560px), 1fr)); gap: 28px; }
+  figure { margin: 0; }
+  figcaption { color: var(--stone); font-size: 13px; margin-top: 10px; }
+  .frame { aspect-ratio: 16/9; container-type: inline-size; background: var(--ink); position: relative; overflow: hidden; outline: 1px solid var(--rule); }
+  .f { position: absolute; inset: 0; padding: 4.4cqw 5cqw 4cqw; display: flex; flex-direction: column; }
+
+  /* chrome */
+  .meta { display: flex; justify-content: space-between; align-items: baseline; font-size: 1.45cqw; color: var(--stone); }
+  .meta .agent { color: var(--sage); font-weight: 500; }
+  .meta .sep { color: var(--dust); margin: 0 .8cqw; }
+  .toc { display: flex; gap: 2.4cqw; margin-top: 1.8cqw; padding-bottom: 1.2cqw; border-bottom: 1px solid var(--rule); font-size: 1.3cqw; color: var(--dust); }
+  .toc span b { font-family: var(--mono); font-weight: 400; margin-right: .6cqw; }
+  .toc .on { color: var(--paper); }
+  .toc .on { box-shadow: 0 1.25cqw 0 -1.05cqw var(--paper); }
+  .caption { font-family: var(--serif); font-size: 2.75cqw; line-height: 1.32; color: var(--dust); max-width: 70%; margin-top: auto; text-wrap: pretty; }
+  .caption b { font-weight: 400; color: var(--paper); }
+  .source { position: absolute; right: 5cqw; bottom: 4cqw; font-family: var(--mono); font-size: 1.2cqw; color: var(--dust); }
+  .source em { font-style: normal; color: var(--stone); }
+
+  /* diff */
+  .code { margin: 2.6cqw 0 2.4cqw; font-family: var(--mono); font-size: 1.58cqw; line-height: 1.8; color: #cbc5b8; }
+  .code div { display: flex; white-space: pre; padding-right: 2cqw; }
+  .code .n { width: 4.2cqw; flex: none; color: var(--dust); text-align: right; padding-right: 1.8cqw; }
+  .code .mk { width: 1.8cqw; flex: none; color: var(--dust); }
+  .code .del { color: var(--dust); }
+  .code .del .t { text-decoration: line-through; text-decoration-color: rgba(197,93,60,.55); }
+  .code .focus { background: rgba(197, 93, 60, .11); color: var(--paper); box-shadow: inset .3cqw 0 0 var(--oxide); }
+  .code .focus .mk, .code .focus .n { color: var(--oxide); }
+  .code .dim { opacity: .45; }
+
+  /* title card */
+  .kicker { font-size: 1.35cqw; letter-spacing: .16em; text-transform: uppercase; color: var(--stone); }
+  .headline { font-family: var(--serif); font-size: 5.1cqw; line-height: 1.08; letter-spacing: -0.012em; margin: 3.2cqw 0 0; max-width: 88%; font-weight: 400; text-wrap: balance; }
+  .facts { margin-top: auto; display: flex; gap: 4.5cqw; border-top: 1px solid var(--rule); padding-top: 1.6cqw; font-size: 1.45cqw; color: var(--stone); }
+  .facts b { display: block; font-weight: 500; color: var(--paper); font-size: 1.75cqw; margin-top: .3cqw; }
+  .facts .verdict b { color: var(--oxide); }
+
+  /* quote + note */
+  .pair { display: grid; grid-template-columns: 1.25fr 1fr; gap: 5cqw; margin-top: 3.4cqw; }
+  .pull { font-family: var(--serif); font-style: italic; font-size: 3.35cqw; line-height: 1.24; color: var(--paper); }
+  .pull::before { content: "“"; color: var(--sage); }
+  .pull::after { content: "”"; color: var(--sage); }
+  .attr { margin-top: 1.8cqw; font-size: 1.4cqw; color: var(--stone); }
+  .attr b { color: var(--sage); font-weight: 500; }
+  .note { border-left: 1px solid var(--ochre); padding-left: 2.2cqw; align-self: start; margin-top: .6cqw; }
+  .note .lab { font-size: 1.2cqw; letter-spacing: .14em; text-transform: uppercase; color: var(--ochre); margin-bottom: 1.2cqw; }
+  .note p { margin: 0; font-size: 1.85cqw; line-height: 1.45; color: #d6d0c3; }
+
+  /* decision */
+  .rec { font-family: var(--serif); font-size: 4.3cqw; line-height: 1.1; margin-top: 3.4cqw; font-weight: 400; }
+  .rec em { font-style: normal; color: var(--oxide); }
+  ol.why { margin: 3cqw 0 0; padding: 0; list-style: none; counter-reset: w; max-width: 80%; }
+  ol.why li { counter-increment: w; display: grid; grid-template-columns: 4cqw 1fr; font-size: 1.95cqw; line-height: 1.4; color: #d6d0c3; padding: 1.1cqw 0; border-top: 1px solid var(--rule); }
+  ol.why li::before { content: "0" counter(w); font-family: var(--mono); font-size: 1.35cqw; color: var(--dust); padding-top: .4cqw; }
+  .choices { margin-top: auto; display: flex; gap: 3.6cqw; font-size: 1.5cqw; color: var(--stone); }
+  .choices span b { color: var(--paper); font-weight: 500; }
+</style>
+</head>
+<body>
+<main>
+  <header class="page">
+    <h1>Lumi, editorial dark</h1>
+    <p>A restrained system for the videos and the review app. Structure comes from type, hairline rules and spacing rather than boxes and badges. Oxide is the only loud colour and marks problems. Ochre marks uncertainty. Agents are told apart by muted, print-like tones.</p>
+  </header>
+
+  <h2 class="section">Palette</h2>
+  <div class="tokens">
+    <div class="sw"><i style="background:#0f0e0c"></i>Ink<br><span>#0f0e0c</span></div>
+    <div class="sw"><i style="background:#ebe6da"></i>Paper<br><span>#ebe6da</span></div>
+    <div class="sw"><i style="background:#a29c8f"></i>Stone<br><span>#a29c8f</span></div>
+    <div class="sw"><i style="background:#6d685e"></i>Dust<br><span>#6d685e</span></div>
+    <div class="sw"><i style="background:#c55d3c"></i>Oxide · problems<br><span>#c55d3c</span></div>
+    <div class="sw"><i style="background:#bf9f5f"></i>Ochre · uncertain<br><span>#bf9f5f</span></div>
+    <div class="sw"><i style="background:#b77a5e"></i>Clay · Claude Code<br><span>#b77a5e</span></div>
+    <div class="sw"><i style="background:#8b9bb3"></i>Slate · Cursor<br><span>#8b9bb3</span></div>
+    <div class="sw"><i style="background:#95a585"></i>Sage · Devin<br><span>#95a585</span></div>
+  </div>
+
+  <h2 class="section">Type</h2>
+  <div class="type">
+    <div><small>Newsreader · narration, headlines</small><span style="font-family:var(--serif);font-size:28px">Full refunds are now rejected.</span></div>
+    <div><small>Schibsted Grotesk · labels, UI</small><span style="font-size:18px">Devin · PR #23 · 2 files · 49 lines</span></div>
+    <div><small>IBM Plex Mono · code, sources</small><span style="font-family:var(--mono);font-size:16px">if (order.refundedCents + amountCents >= order.capturedCents)</span></div>
+  </div>
+
+  <h2 class="section">Frames · PR #23</h2>
+  <div class="frames">
+    <figure><div class="frame"><div class="f">
+      <div class="kicker">Lumi review &nbsp;·&nbsp; Needs your decision</div>
+      <h3 class="headline">Refund guard now blocks full refunds; the test that would catch it was skipped</h3>
+      <div class="facts">
+        <div>Agent<b style="color:var(--sage)">Devin</b></div>
+        <div>Change<b>PR #23 · 49 lines</b></div>
+        <div>Checks<b>26 passed · 1 skipped</b></div>
+        <div class="verdict">Triage<b>Block</b></div>
+      </div>
+    </div></div><figcaption>Title card. The headline states the problem first.</figcaption></figure>
+
+    <figure><div class="frame"><div class="f">
+      <div class="meta"><span><span class="agent">Devin</span><span class="sep">/</span>Harden refund validation</span><span>0:14 / 1:52</span></div>
+      <div class="toc"><span class="on"><b>01</b>What changed</span><span><b>02</b>How it was checked</span><span><b>03</b>Open risks</span><span><b>04</b>Decision</span></div>
+      <div class="code">
+        <div class="dim"><span class="n">38</span><span class="mk"></span>  if (order.status === "refunded") {</div>
+        <div class="dim"><span class="n">39</span><span class="mk"></span>    throw new RefundError(`…already fully refunded`);</div>
+        <div class="dim"><span class="n">40</span><span class="mk"></span>  }</div>
+        <div class="del"><span class="n"></span><span class="mk">−</span>  <span class="t">if (amountCents > refundableCents(order)) {</span></div>
+        <div class="focus"><span class="n">41</span><span class="mk">+</span>  if (order.refundedCents + amountCents >= order.capturedCents) {</div>
+        <div class="dim"><span class="n">42</span><span class="mk"></span>    throw new RefundError(</div>
+        <div class="dim"><span class="n">43</span><span class="mk"></span>      `Refund of ${amountCents} exceeds refundable…`,</div>
+      </div>
+      <div class="caption"><b>The guard now uses ≥ on the running total, so a refund exactly equal</b> to the remaining balance is rejected.</div>
+      <div class="source"><em>diff</em> src/payments/refunds.ts · 41</div>
+    </div></div><figcaption>Diff. The cited line is marked in oxide; the old line is struck through.</figcaption></figure>
+
+    <figure><div class="frame"><div class="f">
+      <div class="meta"><span><span class="agent">Devin</span><span class="sep">/</span>Harden refund validation</span><span>1:21 / 1:52</span></div>
+      <div class="toc"><span><b>01</b>What changed</span><span><b>02</b>How it was checked</span><span class="on"><b>03</b>Open risks</span><span><b>04</b>Decision</span></div>
+      <div class="pair">
+        <div><div class="pull">I skipped one existing test because it was flaky on CI due to shared fixture state.</div><div class="attr"><b>Devin</b>, in its own words</div></div>
+        <div class="note"><div class="lab">Not supported by the evidence</div><p>The skipped test builds a constant order. Nothing is shared between tests, so there is no fixture state to make it flaky.</p></div>
+      </div>
+      <div class="caption"><b>The flakiness explanation is not supported</b> by the code shown.</div>
+      <div class="source"><em>claim</em> PR description · <em>diff</em> refunds.test.ts · 18</div>
+    </div></div><figcaption>The agent's words, set as a pull quote, against Lumi's check of them.</figcaption></figure>
+
+    <figure><div class="frame"><div class="f">
+      <div class="meta"><span><span class="agent">Devin</span><span class="sep">/</span>Harden refund validation</span><span>1:44 / 1:52</span></div>
+      <div class="toc"><span><b>01</b>What changed</span><span><b>02</b>How it was checked</span><span><b>03</b>Open risks</span><span class="on"><b>04</b>Decision</span></div>
+      <div class="rec">Recommendation: <em>request changes</em></div>
+      <ol class="why">
+        <li>Restore the strict comparison so the exact remaining balance can be refunded.</li>
+        <li>Re-enable the skipped test.</li>
+        <li>Add a test that refunds exactly the remaining balance.</li>
+      </ol>
+      <div class="choices"><span><b>Approve</b></span><span><b>Request changes</b></span><span><b>Reject</b></span></div>
+    </div></div><figcaption>Decision card. Lumi's recommendation, then the reviewer's three options.</figcaption></figure>
+  </div>
+</main>
+</body>
+</html>

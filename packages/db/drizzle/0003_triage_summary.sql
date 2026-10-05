@@ -1,0 +1,1 @@
+ALTER TABLE "triage_results" ADD COLUMN "summary" text DEFAULT '' NOT NULL;

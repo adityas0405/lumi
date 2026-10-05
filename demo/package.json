@@ -1,0 +1,20 @@
+{
+  "name": "@lumi/demo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@lumi/core": "workspace:*",
+    "@lumi/db": "workspace:*",
+    "@lumi/github": "workspace:*",
+    "@lumi/pipeline": "workspace:*",
+    "drizzle-orm": "^0.45.3",
+    "octokit": "^5.0.5",
+    "@lumi/ai": "workspace:*",
+    "@lumi/voice": "workspace:*",
+    "@lumi/video": "workspace:*"
+  }
+}

@@ -1,0 +1,21 @@
+@@ -1,4 +1,4 @@
+-import type { Cents } from "../money";
++import { type Cents, roundHalfEven } from "../money";
+ 
+ /** Combined state + average local sales tax rates by region. */
+ export const TAX_RATES: Record<string, number> = {
+@@ -15,7 +15,12 @@ export function taxRate(region: string): number {
+   return rate;
+ }
+ 
+-/** Sales tax on a taxable amount, rounded to the nearest cent (half up). */
++/**
++ * Sales tax on a taxable amount, rounded half-even to the nearest cent. The
++ * payment processor's tax report rounds half-even, so rounding half-up here made
++ * our totals disagree with it by one cent whenever tax landed on exactly half a
++ * cent (FIN-212).
++ */
+ export function taxFor(taxableCents: Cents, region: string): Cents {
+-  return Math.round(taxableCents * taxRate(region));
++  return roundHalfEven(taxableCents * taxRate(region));
+ }

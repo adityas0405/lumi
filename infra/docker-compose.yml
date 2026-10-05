@@ -1,0 +1,27 @@
+name: lumi
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: lumi
+      POSTGRES_PASSWORD: lumi
+      POSTGRES_DB: lumi
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lumi"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  # Local open-weights TTS (Kokoro 82M). Dev, tests and offline fallback for ElevenLabs.
+  kokoro:
+    image: ghcr.io/remsky/kokoro-fastapi-cpu:latest
+    profiles: ["voice"]
+    ports:
+      - "8880:8880"
+
+volumes:
+  pgdata:

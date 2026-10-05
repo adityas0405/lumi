@@ -1,0 +1,141 @@
+.history {
+  max-width: 1080px;
+  margin: 32px auto;
+}
+.history-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.history-head h1 {
+  margin: 0;
+}
+
+.ghost {
+  padding: 9px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  font: inherit;
+  cursor: pointer;
+}
+.ghost:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.ghost.more {
+  display: block;
+  margin: 16px auto 0;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin: 20px 0;
+}
+.stats > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.stats strong {
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+}
+
+.filters {
+  display: flex;
+  gap: 10px;
+}
+.filters input {
+  flex: 1;
+}
+.filters input,
+.filters select {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font: inherit;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 16px;
+}
+.chip {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.chip.on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+.orders {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.orders th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--muted);
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+}
+.orders td {
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--line);
+}
+.orders .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.orders .mono {
+  font-family: ui-monospace, "SF Mono", monospace;
+  font-size: 13px;
+}
+
+.badge {
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.badge.neutral {
+  background: #eeece7;
+  color: #4a4741;
+}
+.badge.info {
+  background: #e3ecf8;
+  color: #1f4b8a;
+}
+.badge.success {
+  background: #e2f1e8;
+  color: #1f5d3a;
+}
+.badge.warning {
+  background: #f8ecdc;
+  color: #8a4b12;
+}
+
+@media (max-width: 760px) {
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .filters {
+    flex-direction: column;
+  }
+}

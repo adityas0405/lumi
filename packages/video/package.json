@@ -1,0 +1,29 @@
+{
+  "name": "@lumi/video",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p .",
+    "test": "vitest run --passWithNoTests",
+    "studio": "remotion studio src/remotion/index.ts"
+  },
+  "dependencies": {
+    "@fontsource/red-hat-mono": "^5.3.0",
+    "@fontsource/red-hat-text": "^5.3.0",
+    "@lumi/core": "workspace:*",
+    "@remotion/bundler": "4.0.529",
+    "@remotion/renderer": "4.0.529",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "remotion": "4.0.529",
+    "shiki": "^4.4.3"
+  },
+  "devDependencies": {
+    "@remotion/cli": "4.0.529",
+    "@types/react": "^19.3.0"
+  }
+}

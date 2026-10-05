@@ -1,0 +1,131 @@
+@import "tailwindcss";
+
+/*
+ * Lumi editorial tokens. Dark is the default; light follows the system unless the
+ * viewer picks one (data-theme). Oxide marks problems and nothing else; ochre marks
+ * uncertainty or waiting on someone. Type is Red Hat Text and Red Hat Mono.
+ * Design rules: DECISIONS.md, "Design for power users"; reference design/codebase-v2.html.
+ */
+:root {
+  --bg: #0f0e0c;
+  --surface: #161512;
+  --raise: #1d1b18;
+  --rule: #2a2824;
+  --rule-2: #36332e;
+  --text: #ebe6da;
+  --text-2: #d6d0c3;
+  --stone: #a29c8f;
+  --dust: #6d685e;
+  --oxide: #c55d3c;
+  --oxide-wash: rgba(197, 93, 60, 0.12);
+  --ochre: #bf9f5f;
+  --ochre-wash: rgba(191, 159, 95, 0.1);
+  --clay: #b77a5e;
+  --slate: #8b9bb3;
+  --sage: #95a585;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f3efe6;
+    --surface: #ebe6db;
+    --raise: #e3ddd0;
+    --rule: #d6cfc1;
+    --rule-2: #c9c1b1;
+    --text: #1c1a17;
+    --text-2: #34312b;
+    --stone: #6a655b;
+    --dust: #938d82;
+    --oxide: #a84a2c;
+    --oxide-wash: rgba(168, 74, 44, 0.1);
+    --ochre: #8c6d2e;
+    --ochre-wash: rgba(140, 109, 46, 0.1);
+    --clay: #9a5f44;
+    --slate: #56698a;
+    --sage: #5b6f4c;
+    color-scheme: light;
+  }
+}
+
+:root[data-theme="light"] {
+  --bg: #f3efe6;
+  --surface: #ebe6db;
+  --raise: #e3ddd0;
+  --rule: #d6cfc1;
+  --rule-2: #c9c1b1;
+  --text: #1c1a17;
+  --text-2: #34312b;
+  --stone: #6a655b;
+  --dust: #938d82;
+  --oxide: #a84a2c;
+  --oxide-wash: rgba(168, 74, 44, 0.1);
+  --ochre: #8c6d2e;
+  --ochre-wash: rgba(140, 109, 46, 0.1);
+  --clay: #9a5f44;
+  --slate: #56698a;
+  --sage: #5b6f4c;
+  color-scheme: light;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-raise: var(--raise);
+  --color-rule: var(--rule);
+  --color-text: var(--text);
+  --color-text-2: var(--text-2);
+  --color-stone: var(--stone);
+  --color-dust: var(--dust);
+  --color-oxide: var(--oxide);
+  --color-oxide-wash: var(--oxide-wash);
+  --color-ochre: var(--ochre);
+  --color-clay: var(--clay);
+  --color-slate: var(--slate);
+  --color-sage: var(--sage);
+  --color-ochre-wash: var(--ochre-wash);
+  --color-rule-2: var(--rule-2);
+  --font-sans: var(--font-red-hat-text), "Segoe UI", system-ui, sans-serif;
+  --font-mono: var(--font-red-hat-mono), ui-monospace, Menlo, Consolas, monospace;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--oxide-wash);
+}
+
+body {
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+/* Section label: small, quiet, never decorative. */
+.kicker {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--dust);
+}
+
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 1px solid var(--text);
+  outline-offset: 3px;
+}

@@ -1,0 +1,18 @@
+{
+  "name": "@lumi/voice",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@lumi/core": "workspace:*",
+    "@lumi/db": "workspace:*",
+    "drizzle-orm": "^0.45.3"
+  }
+}

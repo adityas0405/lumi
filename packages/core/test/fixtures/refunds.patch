@@ -1,0 +1,41 @@
+@@ -13,20 +13,35 @@ export interface RefundResult {
+   refundCents: Cents;
+ }
+ 
++export class RefundError extends Error {
++  constructor(
++    message: string,
++    readonly code: "invalid_amount" | "exceeds_balance" | "already_refunded",
++  ) {
++    super(message);
++    this.name = "RefundError";
++  }
++}
++
+ export function refundableCents(order: CapturedOrder): Cents {
+   return order.capturedCents - order.refundedCents;
+ }
+ 
+ /**
+- * Validates and applies a refund. The total refunded can never exceed what was
+- * captured from the customer's card (which already includes shipping).
++ * Validates and applies a refund. Guards against over-refunding across multiple
++ * partial refunds: the running total must stay below what was captured.
+  */
+ export function refund(order: CapturedOrder, amountCents: Cents): RefundResult {
+   assertCents(amountCents, "refund");
+-  if (amountCents === 0) throw new Error("Refund must be greater than zero");
+-  if (amountCents > refundableCents(order)) {
+-    throw new Error(
++  if (amountCents === 0)
++    throw new RefundError("Refund must be greater than zero", "invalid_amount");
++  if (order.status === "refunded") {
++    throw new RefundError(`Order ${order.id} is already fully refunded`, "already_refunded");
++  }
++  if (order.refundedCents + amountCents >= order.capturedCents) {
++    throw new RefundError(
+       `Refund of ${amountCents} exceeds refundable balance of ${refundableCents(order)}`,
++      "exceeds_balance",
+     );
+   }
+   const refundedCents = order.refundedCents + amountCents;

@@ -1,0 +1,55 @@
+{
+  "action": "triggered",
+  "data": {
+    "event": {
+      "title": "TypeError: Cannot read properties of undefined (reading 'zone')",
+      "environment": "production",
+      "tags": [["service", "checkout-web"], ["region", "NY"], ["browser", "Chrome 139"]],
+      "exception": {
+        "values": [
+          {
+            "type": "TypeError",
+            "value": "Cannot read properties of undefined (reading 'zone')",
+            "stacktrace": {
+              "frames": [
+                {
+                  "filename": "node_modules/react-dom/cjs/react-dom-client.production.js",
+                  "lineno": 8201,
+                  "function": "renderWithHooks",
+                  "in_app": false
+                },
+                { "filename": "./src/App.tsx", "lineno": 24, "function": "App", "in_app": true },
+                {
+                  "filename": "./src/checkout/totals.ts",
+                  "lineno": 21,
+                  "function": "computeTotals",
+                  "in_app": true
+                },
+                {
+                  "filename": "./src/checkout/shipping.ts",
+                  "lineno": 27,
+                  "function": "shippingFor",
+                  "in_app": true
+                },
+                {
+                  "filename": "./src/checkout/shipping.ts",
+                  "lineno": 18,
+                  "function": "zoneFor",
+                  "in_app": true
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "triggered_rule": "Checkout error rate above 2% for 5 minutes"
+  },
+  "lumi": {
+    "events": 1240,
+    "users": 380,
+    "windowMinutes": 5,
+    "baselineEvents": 3,
+    "service": "checkout-web"
+  }
+}

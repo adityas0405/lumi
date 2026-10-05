@@ -1,0 +1,20 @@
+{
+  "name": "@lumi/github",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@lumi/core": "workspace:*",
+    "@octokit/webhooks-methods": "^6.0.0",
+    "fast-xml-parser": "^5.11.1",
+    "fflate": "^0.8.3",
+    "octokit": "^5.0.5"
+  }
+}
